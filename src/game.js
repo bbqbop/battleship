@@ -10,29 +10,32 @@ exports.Game = function(){
 }
 this.Game.prototype = {
     curPlayerAttacks: function(coords){
-        let result;
+        let attackResult;
+        let counterResult;
         this.currentPlayer = !this.currentPlayer
         if(this.currentPlayer){
-            result = this.players.player1.receiveAttack(coords);
+            attackResult = this.players.player1.receiveAttack(coords);
         }
         else {
-            result = this.players.player2.receiveAttack(coords);
+            attackResult = this.players.player2.receiveAttack(coords);
         }
         if (this.compEnemy && !this.currentPlayer){
-            this.compAttack();
+            counterResult = this.compAttack();
         } 
-        return result;
+        return [attackResult, counterResult];
     },
     compAttack: function(){
+        let result;
         this.currentPlayer = !this.currentPlayer;
         let row = Math.floor(Math.random() * 9);
         let col = Math.floor(Math.random() * 9);
         try{
-            this.players.player1.receiveAttack([row,col]);
+            result = this.players.player1.receiveAttack([row,col]);
         }
         catch{
             this.compAttack();
         }
+        return result;
     }
 };
 

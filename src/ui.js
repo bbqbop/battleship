@@ -1,8 +1,18 @@
 exports.initiateUI = function(){
     const content = document.querySelector('.content');
+    const boardWrapper1 = document.createElement('div');
+    boardWrapper1.classList.add('boardWrapper');
+    const boardWrapper2 = document.createElement('div');
+    boardWrapper2.classList.add('boardWrapper');
     const player1Board = createGrid();
     const player2Board = createGrid();
-    content.append(player1Board, player2Board);
+    const display1 = document.createElement('div');
+    display1.classList.add('display');
+    const display2 = document.createElement('div');
+    display2.classList.add('display');
+    boardWrapper1.append(player1Board, display1);
+    boardWrapper2.append(player2Board, display2);
+    content.append(boardWrapper1, boardWrapper2);
 
     function createGrid(){
         const board = document.createElement('div');
@@ -38,7 +48,23 @@ exports.initiateUI = function(){
             board.append(row);
         }
         return board;
-    }
+    };
+    function colorCodeResult(result, field){
+        switch(result){
+            case 'MISS!': 
+                field.textContent = 'X';
+                field.style.color = 'blue'
+                break;
+            case 'HIT!': 
+                field.textContent = 'O';
+                field.style.color = 'red'
+                break;
+            case 'SUNK!':
+                field.textContent = 'O';
+                field.style.color = 'red'
+                break;
+        }
+    };
     return {
         update : function(game){
             for (let i = 9; i >= 0; i--){
@@ -47,40 +73,36 @@ exports.initiateUI = function(){
                     const fieldData = game.players.player1.board[i][j];
                     field.textContent = fieldData;
                     if(fieldData === 'X'){
+                        field.classList.add('miss')
                         field.style.color = 'blue'
                     }
                     else if(fieldData === 'O'){
+                        field.classList.add('hit')
                         field.style.color = 'red'
                     }
                     else if (fieldData !== null){    
+                        field.classList.add('ship')
                         field.style.color = 'green'
                     }
                 }
             }
         },
         setupEventListeners: function(attack, game){
-            const board2 = document.querySelector('.board:last-of-type');
+            const board2 = document.querySelector('.boardWrapper:last-of-type .board');
             const fields = board2.querySelectorAll('.field');
             fields.forEach(field => {
                 field.addEventListener('click', (e) => {
                     const coords = e.target.dataset.coords.slice(1, -1).split(',');
                     try {
                         let result = attack(coords);
-                        switch(result){
-                            case 'MISS!': 
-                                field.textContent = 'X';
-                                field.style.color = 'blue'
-                                break;
-                            case 'HIT!': 
-                                field.textContent = 'O';
-                                field.style.color = 'red'
-                                break;
-                            case 'SUNK!':
-                                field.textContent = 'O';
-                                field.style.color = 'red'
-                                alert(result);
-                                break;
-                        }
+                        console.log(result)
+                        let attackResult = result[0];
+                        let counterResult = result[1];
+                        display2.textContent = attackResult;
+                        setTimeout(() => {
+                            display1.textContent = counterResult;
+                        }, 750);
+                        colorCodeResult(attackResult, field);
                     } catch(error){
                         console.log(error);
                     }
