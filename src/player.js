@@ -76,7 +76,7 @@ this.Player.prototype = {
         const [row, col] = coordinates;
         const field = this.board[row][col]
         if(field == 'X' || field == 'O'){
-            throw new Error('Invalid move, field has already been attacked')
+            throw new Error('Invalid move, field has already been attacked');
         }
         if(field != null){
             attackResult = this.ships[field].hit()

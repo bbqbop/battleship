@@ -15,29 +15,33 @@ this.Game.prototype = {
         let counterResult;
         if(this.currentPlayer){
             attackResult = this.players.player2.receiveAttack(coords);
-            this.currentPlayer = !this.currentPlayer
         }
         else {                                                       // for 2 player mode
             attackResult = this.players.player1.receiveAttack(coords);
-            this.currentPlayer = !this.currentPlayer
         }
-
         if (!this.twoPlayer){
             counterResult = this.compAttack();
         } 
+        else {
+            this.currentPlayer = !this.currentPlayer
+        }
+        console.log(attackResult, counterResult)
         return [attackResult, counterResult];
     },
     compAttack: function(){
         let result;
-        this.currentPlayer = !this.currentPlayer;
-        let row = Math.floor(Math.random() * 9);
-        let col = Math.floor(Math.random() * 9);
-        try{
-            result = this.players.player1.receiveAttack([row,col]);
+        let row = Math.floor(Math.random() * 10);
+        let col = Math.floor(Math.random() * 10);
+        while(!result){
+            try{
+                result = this.players.player1.receiveAttack([row,col]);
+            } catch{
+                console.log('CAUGHT')
+                row = Math.floor(Math.random() * 10);
+                col = Math.floor(Math.random() * 10);
+            }
         }
-        catch{
-            this.compAttack();
-        }
+
         return result;
     },
 };
