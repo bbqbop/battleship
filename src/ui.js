@@ -14,6 +14,23 @@ exports.initiateUI = function(){
     boardWrapper2.append(player2Board, display2);
     content.append(boardWrapper1, boardWrapper2);
 
+    // GAMEOVER SCREEN
+
+    const gameOver = document.createElement('div');
+    gameOver.classList.add('gameOverScreen');
+    const newGame = document.createElement('button');
+    newGame.textContent = 'Start new game';
+    gameOver.textContent = 'GAME OVER';
+    gameOver.append(newGame);
+    gameOver.style.transform = 'scale(0)';
+    content.append(gameOver);
+
+    window.addEventListener('gameOver', (details) => {
+        gameOver.style.transform = 'scale(1)';
+        console.log(details)
+    })
+
+
     function createGrid(){
         const board = document.createElement('div');
         board.classList.add('board');
@@ -89,7 +106,8 @@ exports.initiateUI = function(){
         },
         eventListenerActive: true,
         setupEventListeners: function(attack, game){
-            const board2 = document.querySelector('.boardWrapper:last-of-type .board');
+            const board2 = document.querySelector('.boardWrapper:nth-of-type(2) .board');
+            console.log(board2)
             const fields = board2.querySelectorAll('.field');
             fields.forEach(field => {
                 field.addEventListener('click', (event) => {

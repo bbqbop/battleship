@@ -15,7 +15,4 @@ window.addEventListener('gameOver', () => {
     UI.eventListenersActive = false;
 })
     
-
-
-
 console.log(newGame);

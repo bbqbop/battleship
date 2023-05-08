@@ -2,8 +2,8 @@ const { Player } = require('./player');
 
 exports.Game = function(){
     this.players = {
-        player1: new Player(),
-        player2: new Player(),
+        player1: new Player('Player1'),
+        player2: new Player('Computer'),
     };
     this.currentPlayer = true;
     this.twoPlayer = false;
@@ -25,7 +25,6 @@ this.Game.prototype = {
         else {
             this.currentPlayer = !this.currentPlayer
         }
-        console.log(attackResult, counterResult)
         return [attackResult, counterResult];
     },
     compAttack: function(){

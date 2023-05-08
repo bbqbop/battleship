@@ -1,9 +1,10 @@
 const { Ship } = require('./ship');
 
-exports.Player = function(){
+exports.Player = function(name){
     this.board = new Array(10).fill(null).map(() => new Array(10).fill(null));
     this.ships = {};
     this.hasLost = false;
+    this.name = name;
 }
 this.Player.prototype = {
     placeShip: function(length, startPos, isVert){
@@ -93,7 +94,7 @@ this.Player.prototype = {
         if(Object.values(this.ships).every(ship => ship.isSunk)){
             this.hasLost = true;
             const gameOverEvent = new CustomEvent('gameOver');
-            window.dispatchEvent(gameOverEvent);
+            window.dispatchEvent(gameOverEvent, {details: this.name});
         };
     }
 }
