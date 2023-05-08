@@ -7,15 +7,32 @@ exports.initiateUI = function(){
     function createGrid(){
         const board = document.createElement('div');
         board.classList.add('board');
-        for (let i = 9; i >= 0; i--){
+        const yLabels = 'ABCDEFGHIJ';
+        for (let i = 10; i >= 0; i--){
             const row = document.createElement('div');
             row.classList.add('row')
-            row.dataset.row = i;
-            for (let j = 0; j < 10; j++){
+            row.dataset.row = i-1;
+            for (let j = 0; j <= 10; j++){
                 const field = document.createElement('div');
-                field.classList.add('field');
-                field.dataset.coords = `[${i},${j}]`;
-                // field.textContent = `[${i},${j}]`;
+                if(i == 0 || j == 0){               // print labels for the grid
+                    field.classList.add('label')
+                    if(i == 0){                     // X
+                        if (j == 0){
+                            field.textContent = '';
+                            field.classList.add('corner')
+                        }
+                        else {
+                            field.textContent = j;
+                        }
+                    }
+                    else if(j == 0){                // Y
+                        field.textContent = yLabels[i-1];
+                    }
+                }
+                else{
+                    field.classList.add('field');
+                    field.dataset.coords = `[${i-1},${j-1}]`;
+                }
                 row.append(field);
             }
             board.append(row);
