@@ -75,7 +75,7 @@ this.Player.prototype = {
 
         const [row, col] = coordinates;
         const field = this.board[row][col]
-        if(field == 'X'){
+        if(field == 'X' || field == 'O'){
             throw new Error('Invalid move, field has already been attacked')
         }
         if(field != null){
@@ -92,6 +92,8 @@ this.Player.prototype = {
     checkStatus: function(){
         if(Object.values(this.ships).every(ship => ship.isSunk)){
             this.hasLost = true;
+            const gameOverEvent = new CustomEvent('gameOver');
+            window.dispatchEvent(gameOverEvent);
         };
     }
 }

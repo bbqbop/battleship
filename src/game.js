@@ -15,18 +15,15 @@ this.Game.prototype = {
         let counterResult;
         if(this.currentPlayer){
             attackResult = this.players.player2.receiveAttack(coords);
-            this.checkStatus(attackResult);
             this.currentPlayer = !this.currentPlayer
         }
         else {                                                       // for 2 player mode
             attackResult = this.players.player1.receiveAttack(coords);
-            this.checkStatus(attackResult);
             this.currentPlayer = !this.currentPlayer
         }
 
         if (!this.twoPlayer){
             counterResult = this.compAttack();
-            this.checkStatus(counterResult);
         } 
         return [attackResult, counterResult];
     },
@@ -43,12 +40,6 @@ this.Game.prototype = {
         }
         return result;
     },
-    checkStatus: function(obj){
-        console.log(obj)
-        if(obj.isGameOver){
-            this.gameOver = true;
-        }
-    }
 };
 
 
