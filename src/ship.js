@@ -9,7 +9,7 @@ this.Ship.prototype = {
         this.checkSunk();
     },
     checkSunk: function(){
-        if(this.hitCount >= this.length){
+        if(this.hitCount >= this.length) {
             this.isSunk = true;
         }
     }

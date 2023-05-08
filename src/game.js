@@ -1,9 +1,9 @@
-const { GameBoard } = require('./gameboard');
+const { Player } = require('./player');
 
 exports.Game = function(){
     this.players = {
-        player1: new GameBoard(),
-        player2: new GameBoard(),
+        player1: new Player(),
+        player2: new Player(),
     };
     this.currentPlayer = true;
     this.compEnemy = true;
@@ -25,7 +25,12 @@ this.Game.prototype = {
         this.currentPlayer = !this.currentPlayer;
         let row = Math.floor(Math.random() * 9);
         let col = Math.floor(Math.random() * 9);
-        this.players.player1.receiveAttack([row,col]);
+        try{
+            this.players.player1.receiveAttack([row,col]);
+        }
+        catch{
+            this.compAttack();
+        }
     }
 };
 
