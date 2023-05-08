@@ -27,7 +27,17 @@ exports.initiateUI = function(){
             for (let i = 9; i >= 0; i--){
                 for (let j = 0; j < 10; j++){
                     const field = document.querySelector(`[data-coords="[${i},${j}]"`)
-                    field.textContent = game.players.player1.board[i][j];
+                    const fieldData = game.players.player1.board[i][j];
+                    field.textContent = fieldData;
+                    if(fieldData === 'X'){
+                        field.style.color = 'blue'
+                    }
+                    else if(fieldData === 'O'){
+                        field.style.color = 'red'
+                    }
+                    else if (fieldData !== null){    
+                        field.style.color = 'green'
+                    }
                 }
             }
         },
@@ -42,12 +52,15 @@ exports.initiateUI = function(){
                         switch(result){
                             case 'MISS!': 
                                 field.textContent = 'X';
+                                field.style.color = 'blue'
                                 break;
                             case 'HIT!': 
                                 field.textContent = 'O';
+                                field.style.color = 'red'
                                 break;
                             case 'SUNK!':
-                                field.textContent = 'X';
+                                field.textContent = 'O';
+                                field.style.color = 'red'
                                 alert(result);
                                 break;
                         }

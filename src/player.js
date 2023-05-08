@@ -83,6 +83,7 @@ this.Player.prototype = {
     checkStatus: function(){
         if(Object.values(this.ships).every(ship => ship.isSunk)){
             this.hasLost = true;
+            alert('GAME OVER');
         };
     }
 }
