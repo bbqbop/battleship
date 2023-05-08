@@ -6,11 +6,15 @@ exports.Ship = function(length){
 this.Ship.prototype = {
     hit: function(){
         this.hitCount++;
-        this.checkSunk();
+        let result = this.checkSunk();
+        return result;
     },
     checkSunk: function(){
+        let result = 'HIT!'
         if(this.hitCount >= this.length) {
             this.isSunk = true;
+            result = 'SUNK!'
         }
+        return result;
     }
 }

@@ -40,7 +40,7 @@ this.Player.prototype = {
             try {
                 this.placeShip(length, [row, col], isVert);
             } catch (error) {
-                console.log('Error placing ship:', error.message);
+                // console.log('Error placing ship:', error.message);
                 allShipsPlaced = false; // Set to false if any ship placement fails
                 this.board = new Array(10).fill(null).map(() => new Array(10).fill(null)); // Clear the board
                 break; // Restart the loop for retrying ship placement
@@ -65,14 +65,20 @@ this.Player.prototype = {
     receiveAttack: function(coordinates) {
         const [row, col] = coordinates;
         const field = this.board[row][col]
+        let result;
         if(field == 'X'){
             throw new Error('Invalid move, field has already been attacked')
         }
         if(field != null){
-            this.ships[field].hit()
+            result = this.ships[field].hit()
             this.checkStatus();
+            this.board[row][col] = 'O';
         }
-        this.board[row][col] = 'X';
+        else{
+            result = 'MISS!'
+            this.board[row][col] = 'X';
+        }
+        return result;
     },
     checkStatus: function(){
         if(Object.values(this.ships).every(ship => ship.isSunk)){

@@ -31,5 +31,34 @@ exports.initiateUI = function(){
                 }
             }
         },
+        setupEventListeners: function(attack, game){
+            const board2 = document.querySelector('.board:last-of-type');
+            const fields = board2.querySelectorAll('.field');
+            fields.forEach(field => {
+                field.addEventListener('click', (e) => {
+                    const coords = e.target.dataset.coords.slice(1, -1).split(',');
+                    try {
+                        let result = attack(coords);
+                        switch(result){
+                            case 'MISS!': 
+                                field.textContent = 'X';
+                                break;
+                            case 'HIT!': 
+                                field.textContent = 'O';
+                                break;
+                            case 'SUNK!':
+                                field.textContent = 'X';
+                                alert(result);
+                                break;
+                        }
+                    } catch(error){
+                        console.log(error);
+                    }
+                    setTimeout(()=>{
+                        this.update(game)
+                    }, 750);
+                })
+            })
+        },
     }
 }

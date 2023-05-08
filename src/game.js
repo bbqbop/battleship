@@ -9,17 +9,19 @@ exports.Game = function(){
     this.compEnemy = true;
 }
 this.Game.prototype = {
-    curPlayerAttacks: function(coordinates){
+    curPlayerAttacks: function(coords){
+        let result;
         this.currentPlayer = !this.currentPlayer
         if(this.currentPlayer){
-            this.players.player1.receiveAttack(coordinates);
+            result = this.players.player1.receiveAttack(coords);
         }
         else {
-            this.players.player2.receiveAttack(coordinates);
+            result = this.players.player2.receiveAttack(coords);
         }
         if (this.compEnemy && !this.currentPlayer){
             this.compAttack();
         } 
+        return result;
     },
     compAttack: function(){
         this.currentPlayer = !this.currentPlayer;
