@@ -8,3 +8,5 @@ newGame.players.player2.populateGameboard();
 const UI = initiateUI();
 UI.update(newGame);
 UI.setupEventListeners(newGame.curPlayerAttacks.bind(newGame), newGame);
+
+console.log(newGame);

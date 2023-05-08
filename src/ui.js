@@ -49,7 +49,7 @@ exports.initiateUI = function(){
         }
         return board;
     };
-    function colorCodeResult(result, field){
+    function printResult(result, field){
         switch(result){
             case 'MISS!': 
                 field.textContent = 'X';
@@ -91,26 +91,28 @@ exports.initiateUI = function(){
             const board2 = document.querySelector('.boardWrapper:last-of-type .board');
             const fields = board2.querySelectorAll('.field');
             fields.forEach(field => {
-                field.addEventListener('click', (e) => {
-                    const coords = e.target.dataset.coords.slice(1, -1).split(',');
-                    try {
-                        let result = attack(coords);
-                        console.log(result)
-                        let attackResult = result[0];
-                        let counterResult = result[1];
-                        display2.textContent = attackResult;
-                        setTimeout(() => {
-                            display1.textContent = counterResult;
-                        }, 750);
-                        colorCodeResult(attackResult, field);
-                    } catch(error){
-                        console.log(error);
-                    }
-                    setTimeout(()=>{
-                        this.update(game)
-                    }, 750);
+                field.addEventListener('click', (event) => {
+                    this.handleAttacks(event, attack, game);
                 })
             })
+        },
+        handleAttacks: function(event, attack, game){
+            const coords = event.target.dataset.coords.slice(1, -1).split(',');
+            try {
+                let result = attack(coords);
+                let attackResult = result[0].attackResult;
+                let counterResult = result[1].attackResult;
+                display2.textContent = attackResult;
+                setTimeout(() => {
+                    display1.textContent = counterResult;
+                }, 750);
+                printResult(attackResult, event.target);
+            } catch(error){
+                console.log(error);
+            }
+            setTimeout(()=>{
+                this.update(game)
+            }, 750);
         },
     }
 }

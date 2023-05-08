@@ -7,6 +7,7 @@ exports.Game = function(){
     };
     this.currentPlayer = true;
     this.compEnemy = true;
+    this.gameOver = false;
 }
 this.Game.prototype = {
     curPlayerAttacks: function(coords){
@@ -18,9 +19,11 @@ this.Game.prototype = {
         }
         else {
             attackResult = this.players.player2.receiveAttack(coords);
+            this.checkStatus(attackResult);
         }
         if (this.compEnemy && !this.currentPlayer){
             counterResult = this.compAttack();
+            this.checkStatus(counterResult);
         } 
         return [attackResult, counterResult];
     },
@@ -36,13 +39,13 @@ this.Game.prototype = {
             this.compAttack();
         }
         return result;
+    },
+    checkStatus: function(obj){
+        console.log(obj)
+        if(obj.isGameOver){
+            this.gameOver = true;
+        }
     }
 };
-
-// const newGame = new this.Game();
-// newGame.curPlayerAttacks([2,2]);
-// console.log(newGame.players.player1.board)
-// newGame.curPlayerAttacks([4,4]);
-// console.log(newGame.players.player1.board)
 
 
