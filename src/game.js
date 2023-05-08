@@ -6,22 +6,25 @@ exports.Game = function(){
         player2: new Player(),
     };
     this.currentPlayer = true;
-    this.compEnemy = true;
+    this.twoPlayer = false;
     this.gameOver = false;
 }
 this.Game.prototype = {
     curPlayerAttacks: function(coords){
         let attackResult;
         let counterResult;
-        this.currentPlayer = !this.currentPlayer
         if(this.currentPlayer){
-            attackResult = this.players.player1.receiveAttack(coords);
-        }
-        else {
             attackResult = this.players.player2.receiveAttack(coords);
             this.checkStatus(attackResult);
+            this.currentPlayer = !this.currentPlayer
         }
-        if (this.compEnemy && !this.currentPlayer){
+        else {                                                       // for 2 player mode
+            attackResult = this.players.player1.receiveAttack(coords);
+            this.checkStatus(attackResult);
+            this.currentPlayer = !this.currentPlayer
+        }
+
+        if (!this.twoPlayer){
             counterResult = this.compAttack();
             this.checkStatus(counterResult);
         } 

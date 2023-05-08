@@ -87,6 +87,7 @@ exports.initiateUI = function(){
                 }
             }
         },
+        eventListenerActive: true,
         setupEventListeners: function(attack, game){
             const board2 = document.querySelector('.boardWrapper:last-of-type .board');
             const fields = board2.querySelectorAll('.field');
@@ -97,22 +98,29 @@ exports.initiateUI = function(){
             })
         },
         handleAttacks: function(event, attack, game){
+            if(!this.eventListenerActive){
+                return;
+            };
             const coords = event.target.dataset.coords.slice(1, -1).split(',');
-            try {
-                let result = attack(coords);
+            let result;
+            try{
+                result = attack(coords);
                 let attackResult = result[0].attackResult;
                 let counterResult = result[1].attackResult;
                 display2.textContent = attackResult;
+                this.eventListenerActive = false;
                 setTimeout(() => {
                     display1.textContent = counterResult;
                 }, 750);
                 printResult(attackResult, event.target);
-            } catch(error){
-                console.log(error);
+                setTimeout(()=>{
+                    this.update(game)
+                    this.eventListenerActive = true
+                }, 750);
+            }catch(error){
+                display2.textContent = error.message;
             }
-            setTimeout(()=>{
-                this.update(game)
-            }, 750);
+            return;
         },
     }
 }
