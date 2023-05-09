@@ -173,6 +173,8 @@ exports.initiateUI = function(){
                 }, 1000);
             } catch(error){
                 printDisplay(display2, '!');
+                console.log(error.message)
+
             }
             
             return;

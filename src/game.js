@@ -8,6 +8,7 @@ exports.Game = function(){
     this.currentPlayer = true;
     this.twoPlayer = false;
     this.gameOver = false;
+    this.compQueue = [];
 }
 this.Game.prototype = {
     curPlayerAttacks: function(coords){
@@ -29,20 +30,43 @@ this.Game.prototype = {
     },
     compAttack: function(){
         let result;
-        let row = Math.floor(Math.random() * 10);
-        let col = Math.floor(Math.random() * 10);
+        let row;
+        let col;
         while(!result){
             try{
+                if (this.compQueue.length > 0){
+                    [ row, col ] = this.compQueue.shift();
+                }
+                else {
+                    row = Math.floor(Math.random() * 10);
+                    col = Math.floor(Math.random() * 10);
+                }
                 result = this.players.player1.receiveAttack([row,col]);
+                if (result.attackResult[0] === 'HIT!'){
+                    this.fillQueue(row, col);
+                }
             } catch{
-                console.log('CAUGHT')
+                if (this.compQueue.length > 0){
+                    [ row, col ] = this.compQueue.shift();
+                }
                 row = Math.floor(Math.random() * 10);
                 col = Math.floor(Math.random() * 10);
             }
         }
-
         return result;
     },
+    fillQueue(row, col){
+        const surroundingCoords = [
+            [row-1, col+1],[row, col+1],[row+1, col+1],[row+1, col],
+            [row+1, col-1],[row, col-1],[row-1, col-1],[row-1, col]
+        ]
+        surroundingCoords.forEach(coord => {
+            if(coord[0] >= 0 && coord[0] <= 9 && coord[1] >= 0 && coord[1] <= 9){
+                this.compQueue.push(coord);
+                console.log(coord);
+            }
+        })
+    }
 };
 
 
