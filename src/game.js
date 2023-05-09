@@ -35,6 +35,7 @@ this.Game.prototype = {
         while(!result){
             try{
                 if (this.compQueue.length > 0){
+                    console.log(this.compQueue);
                     [ row, col ] = this.compQueue.shift();
                 }
                 else {
@@ -44,6 +45,9 @@ this.Game.prototype = {
                 result = this.players.player1.receiveAttack([row,col]);
                 if (result.attackResult[0] === 'HIT!'){
                     this.fillQueue(row, col);
+                }
+                if (result.attackResult[0] === 'SUNK!'){
+                    this.compQueue = []
                 }
             } catch{
                 if (this.compQueue.length > 0){
@@ -57,13 +61,12 @@ this.Game.prototype = {
     },
     fillQueue(row, col){
         const surroundingCoords = [
-            [row-1, col+1],[row, col+1],[row+1, col+1],[row+1, col],
-            [row+1, col-1],[row, col-1],[row-1, col-1],[row-1, col]
+            [row, col+1], [row+1, col],
+            [row, col-1], [row-1, col]
         ]
         surroundingCoords.forEach(coord => {
             if(coord[0] >= 0 && coord[0] <= 9 && coord[1] >= 0 && coord[1] <= 9){
                 this.compQueue.push(coord);
-                console.log(coord);
             }
         })
     }
