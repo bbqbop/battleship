@@ -31,12 +31,6 @@ exports.initiateUI = function(){
     gameOver.style.transform = 'scale(0)';
     content.append(gameOver);
 
-    window.addEventListener('gameOver', (event) => {
-        gameOver.style.transform = 'scale(1)';
-        player1Board.style.filter = 'blur(5px)'
-        player2Board.style.filter = 'blur(5px)'
-        gameOverResult.textContent = `${event.detail} loses!`
-    })
     newGameBtn.addEventListener('click', () => {
         gameOver.style.transform = 'scale(0)';
         player1Board.style.filter = '';
@@ -182,6 +176,13 @@ exports.initiateUI = function(){
             }
             
             return;
+        },
+        toggleGameOver: function(winner){
+                gameOver.style.transform = 'scale(1)';
+                player1Board.style.filter = 'blur(5px)'
+                player2Board.style.filter = 'blur(5px)'
+                gameOverResult.textContent = `${winner} wins!`
+        
         },
     }
 }

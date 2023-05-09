@@ -4,11 +4,10 @@ import './style.css';
 
 let newGame; 
 let UI;
-UI = new initiateUI();
-
 
 function startGame(){
     newGame = new Game();
+    UI = new initiateUI();
     newGame.players.player1.populateGameboard();
     newGame.players.player2.populateGameboard();
     UI.update(newGame);
@@ -18,6 +17,12 @@ function startGame(){
 window.addEventListener('gameOver', () => {
     newGame.gameOver = true;
     UI.eventListenersActive = false;
+    let winner;
+    for (let player in newGame.players){
+        if(!newGame.players[player].hasLost)
+            winner = newGame.players[player].name;
+    }   
+    UI.toggleGameOver(winner);
 });
 window.addEventListener('newGame', () => {
     startGame();
@@ -25,3 +30,4 @@ window.addEventListener('newGame', () => {
     
 startGame();
 console.log(newGame);
+
