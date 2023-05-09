@@ -68,6 +68,6 @@
     background-color: rgba(128, 128, 128, 0.3);
 }
 
-.sunk {
+.boardWrapper .board .field.sunk {
     background-color: rgb(93, 93, 93, 0.3);
 }

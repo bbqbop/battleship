@@ -100,13 +100,19 @@ exports.initiateUI = function(){
             case 'SUNK!':
                 field.textContent = 'O';
                 field.style.color = 'red'
-                result[1].coords.forEach(coord => {
-                    const sunkField = document.querySelector(`.boardWrapper:nth-of-type(2) [data-coords="[${coord}]"]`)
-                    sunkField.classList.add('sunk');
-                })
+                setShipSunk(result[1], false)
                 break;
         }
     };
+
+
+    function setShipSunk(ship, isBoard1){
+        const boardSelector = isBoard1 ? '.boardWrapper' : '.boardWrapper:nth-of-type(2)';
+        ship.coords.forEach(coord => {
+            const sunkField = document.querySelector(`${boardSelector} [data-coords="[${coord}]"]`)
+            sunkField.classList.add('sunk');
+        })
+    }
     
     return {
         update : function(game){
@@ -148,13 +154,15 @@ exports.initiateUI = function(){
             let result;
             try {
                 result = attack(coords);
-                console.log(result);
                 let attackResult = result[0].attackResult;
                 let counterResult = result[1].attackResult;
                 display2.textContent = attackResult[0];
                 this.eventListenerActive = false;
                 setTimeout(() => {
                     display1.textContent = counterResult[0];
+                    if (counterResult[0] === 'SUNK!'){
+                        setShipSunk(counterResult[1], true);
+                    }
                 }, 750);
                 printResult(attackResult, event.target);
                 setTimeout(()=>{
