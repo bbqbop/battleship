@@ -4,19 +4,19 @@ exports.initiateUI = function(){
 
     // GameBoards
 
-    const boardWrapper1 = document.createElement('div');
-    boardWrapper1.classList.add('boardWrapper');
-    const boardWrapper2 = document.createElement('div');
-    boardWrapper2.classList.add('boardWrapper');
     const player1Board = createGrid();
+    player1Board.id = 'board1';
     const player2Board = createGrid();
+    player2Board.id = 'board2';
     const display1 = document.createElement('div');
     display1.classList.add('display');
+    display1.id = 'display1';
     const display2 = document.createElement('div');
     display2.classList.add('display');
-    boardWrapper1.append(player1Board, display1);
-    boardWrapper2.append(player2Board, display2);
-    content.append(boardWrapper1, boardWrapper2);
+    display2.id = 'display2';
+
+   
+    content.append(player1Board, display1, player2Board, display2);
 
     // GAMEOVER SCREEN
 
@@ -33,14 +33,14 @@ exports.initiateUI = function(){
 
     window.addEventListener('gameOver', (event) => {
         gameOver.style.transform = 'scale(1)';
-        boardWrapper1.style.filter = 'blur(5px)'
-        boardWrapper2.style.filter = 'blur(5px)'
+        player1Board.style.filter = 'blur(5px)'
+        player2Board.style.filter = 'blur(5px)'
         gameOverResult.textContent = `${event.detail} loses!`
     })
     newGameBtn.addEventListener('click', () => {
         gameOver.style.transform = 'scale(0)';
-        boardWrapper1.style.filter = '';
-        boardWrapper2.style.filter = '';
+        player1Board.style.filter = '';
+        player2Board.style.filter = '';
         const newGameEvent = new CustomEvent('newGame');
         window.dispatchEvent(newGameEvent);
     })
@@ -105,9 +105,16 @@ exports.initiateUI = function(){
         }
     };
 
+    function printDisplay(display, string){
+        display.textContent = string;
+        setTimeout(() => {
+            display.textContent = '';
+        }, 1000);
+    }
+
 
     function setShipSunk(ship, isBoard1){
-        const boardSelector = isBoard1 ? '.boardWrapper' : '.boardWrapper:nth-of-type(2)';
+        const boardSelector = isBoard1 ? '#board1' : '#board2';
         ship.coords.forEach(coord => {
             const sunkField = document.querySelector(`${boardSelector} [data-coords="[${coord}]"]`)
             sunkField.classList.add('sunk');
@@ -120,14 +127,15 @@ exports.initiateUI = function(){
                 for (let j = 0; j < 10; j++){
                     const field = document.querySelector(`[data-coords="[${i},${j}]"`)
                     const fieldData = game.players.player1.board[i][j];
-                    field.textContent = fieldData;
                     if(fieldData === 'X'){
                         field.classList.add('miss')
                         field.style.color = 'blue'
+                        field.textContent = fieldData;
                     }
                     else if(fieldData === 'O'){
                         field.classList.add('hit')
                         field.style.color = 'red'
+                        field.textContent = fieldData;
                     }
                     else if (fieldData !== null){    
                         field.classList.add('ship');
@@ -138,7 +146,7 @@ exports.initiateUI = function(){
         },
         eventListenerActive: true,
         setupEventListeners: function(attack, game){
-            const board2 = document.querySelector('.boardWrapper:nth-of-type(2) .board');
+            const board2 = document.querySelector('#board2');
             const fields = board2.querySelectorAll('.field');
             fields.forEach(field => {
                 field.addEventListener('click', (event) => {
@@ -156,22 +164,23 @@ exports.initiateUI = function(){
                 result = attack(coords);
                 let attackResult = result[0].attackResult;
                 let counterResult = result[1].attackResult;
-                display2.textContent = attackResult[0];
+                printDisplay(display2, attackResult[0]);
                 this.eventListenerActive = false;
                 setTimeout(() => {
-                    display1.textContent = counterResult[0];
+                    printDisplay(display1, counterResult[0])
                     if (counterResult[0] === 'SUNK!'){
                         setShipSunk(counterResult[1], true);
                     }
-                }, 750);
+                }, 1000);
                 printResult(attackResult, event.target);
                 setTimeout(()=>{
                     this.update(game)
                     this.eventListenerActive = true
-                }, 750);
+                }, 1000);
             } catch(error){
-                display2.textContent = error.message;
+                printDisplay(display2, '!');
             }
+            
             return;
         },
     }

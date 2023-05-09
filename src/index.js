@@ -4,10 +4,11 @@ import './style.css';
 
 let newGame; 
 let UI;
+UI = new initiateUI();
+
 
 function startGame(){
     newGame = new Game();
-    UI = new initiateUI();
     newGame.players.player1.populateGameboard();
     newGame.players.player2.populateGameboard();
     UI.update(newGame);
