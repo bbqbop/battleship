@@ -2,6 +2,7 @@ exports.Ship = function(length){
     this.length = length;
     this.hitCount = 0;
     this.isSunk = false;
+    this.coords = [];
 }
 this.Ship.prototype = {
     hit: function(){
@@ -15,6 +16,6 @@ this.Ship.prototype = {
             this.isSunk = true;
             result = 'SUNK!'
         }
-        return result;
+        return [result, this];
     }
 }

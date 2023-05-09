@@ -15,9 +15,12 @@ this.Player.prototype = {
         for (i = 0; i < length; i++){
             if(isVert){
                 this.board[row][col - i] = initial;
+                this.ships[initial].coords.push([row, col - i])
             }
             else{
                 this.board[row + i][col] = initial;
+                this.ships[initial].coords.push([row + i, col])
+
             }
         }        
     },
@@ -85,7 +88,7 @@ this.Player.prototype = {
             this.board[row][col] = 'O';
         }
         else{
-            attackResult = 'MISS!'
+            attackResult = ['MISS!',null]
             this.board[row][col] = 'X';
         }
         return {attackResult, isGameOver: this.hasLost};
@@ -93,8 +96,8 @@ this.Player.prototype = {
     checkStatus: function(){
         if(Object.values(this.ships).every(ship => ship.isSunk)){
             this.hasLost = true;
-            const gameOverEvent = new CustomEvent('gameOver');
-            window.dispatchEvent(gameOverEvent, {details: this.name});
+            const gameOverEvent = new CustomEvent('gameOver', {detail: this.name});
+            window.dispatchEvent(gameOverEvent);
         };
     }
 }

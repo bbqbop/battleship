@@ -13,6 +13,7 @@
     grid-template-rows: repeat(11, 30px);
     justify-content: center;
     align-items: center;
+    box-shadow: 2px 2px 2px;
 }
 
 .display {
@@ -43,9 +44,30 @@
 }
 .label.corner {
     background-color: transparent;
-    border: none;
 }
 
-.field.ship {
+.field.ship.A {
     background-color: rgb(0, 128, 0, 0.3);
+}
+.field.ship.B {
+    background-color: rgba(0, 0, 128, 0.3);
+}
+.field.ship.C {
+    background-color: rgba(128, 0, 0, 0.3);
+}
+.field.ship.D1 {
+    background-color: rgba(128, 0, 128, 0.3);
+}
+.field.ship.D2 {
+    background-color: rgba(128, 128, 0, 0.3);
+}
+.field.ship.S1 {
+    background-color: rgba(0, 128, 128, 0.3);
+}
+.field.ship.S2 {
+    background-color: rgba(128, 128, 128, 0.3);
+}
+
+.sunk {
+    background-color: rgb(93, 93, 93, 0.3);
 }
