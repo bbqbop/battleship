@@ -8,7 +8,7 @@ exports.Game = function(){
     this.currentPlayer = true;
     this.twoPlayer = false;
     this.gameOver = false;
-    this.compQueue = {lastHits: [], cue: []};
+    this.compQueue = {lastHits: [],direction: null, cue: []};
 }
 this.Game.prototype = {
     curPlayerAttacks: function(coords){
@@ -34,6 +34,7 @@ this.Game.prototype = {
         let col;
         while(!result){
             try{
+                console.log(this.compQueue);
                 if (this.compQueue.cue.length > 0){
                     [ row, col ] = this.compQueue.cue.shift();
                 }
@@ -46,43 +47,41 @@ this.Game.prototype = {
                     this.fillQueue(row, col);
                 }
                 if (result.attackResult[0] === 'SUNK!'){
-                    this.compQueue.lastHits = [];
+                    this.clearQueueDirection(row, col);
                 }
             } catch{
                 if (this.compQueue.cue.length > 0){
                     [ row, col ] = this.compQueue.cue.shift();
                 }
-                row = Math.floor(Math.random() * 10);
-                col = Math.floor(Math.random() * 10);
+                else{ 
+                    row = Math.floor(Math.random() * 10);
+                    col = Math.floor(Math.random() * 10);
+                }
             }
         }
         return result;
     },
-    fillQueue(row, col){
-        console.log('1')
+    fillQueue: function(row, col){
         // if hit is second hit
             // compare with last hit
         if (this.compQueue.lastHits.length > 0){
-            const [lastRow, lastCol] = this.compQueue.lastHits[0];
+            const [lastRow, lastCol] = this.compQueue.lastHits.shift();
             // if vertical
             if (row === lastRow + 1 || row === lastRow - 1 && col === lastCol){
-                console.log(row, lastRow, 'vertical', this.compQueue.cue);
+                this.compQueue.direction = 'vertical'
                 const fieldsInCol = [[row+1,col],[row-1,col],[lastRow+1, col],[lastRow-1, col]]
                 fieldsInCol.forEach(coord => this.compQueue.cue.unshift(coord))
-                console.log('afterwards', this.compQueue.cue)
 
             }
             // if horizontal
             else {
-                console.log(col, lastCol, 'horizontal', this.compQueue.cue)
+                this.compQueue.direction = 'horizontal'
                 const fieldsInRow = [[row,col+1],[row,col-1],[row, lastCol+1],[row, lastCol-1]]
                 fieldsInRow.forEach(coord => this.compQueue.cue.unshift(coord)
                 )
-                console.log('afterwards', this.compQueue.cue)
 
             }
         }
-        console.log('2')
         this.compQueue.lastHits.push([row,col]);
         
         const surroundingCoords = [
@@ -95,8 +94,29 @@ this.Game.prototype = {
                 this.compQueue.cue.push(coord);
             }
         })
-        console.log(this.compQueue)
+    },
+    clearQueueDirection: function(row, col){
+        if (this.compQueue.direction === 'horizontal'){
+            this.compQueue.lastHits.forEach(entry => {
+                if(entry[0] === row){
+                    // console.log('here', row, col)
+                    const idx = this.compQueue.lastHits.indexOf(entry);
+                    this.compQueue.lastHits.splice(idx, 1)
+                    console.log('spliceHor', this.compQueue.lastHits.splice(idx, 1))
+                }
+            })
+        }
+        else {
+            this.compQueue.lastHits.forEach(entry => {
+                if(entry[1] === col){
+                    const idx = this.compQueue.lastHits.indexOf(entry);
+                    this.compQueue.lastHits.splice(idx, 1)
+                    console.log('spliceVert', this.compQueue.lastHits.splice(idx, 1))
+                }
+            })
+        }
     }
+
 };
 
 
