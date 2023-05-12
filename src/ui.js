@@ -2,6 +2,18 @@ exports.initiateUI = function(){
     const content = document.querySelector('.content');
     content.innerHTML = '';
 
+    // Splash page
+    const splash = document.createElement('div');
+    splash.classList.add('splash');
+    const singlePlayerBtn = document.createElement('button');
+    singlePlayerBtn.id = 'singlePlayerBtn'
+    singlePlayerBtn.textContent = 'Single player'
+    const twoPlayerBtn = document.createElement('button');
+    twoPlayerBtn.id = 'twoPlayerBtn'
+    twoPlayerBtn.textContent = 'Two players'
+    splash.append(singlePlayerBtn, twoPlayerBtn);
+    content.append(splash)
+
     // GameBoards
 
     const player1Board = createGrid();
@@ -38,6 +50,13 @@ exports.initiateUI = function(){
         const newGameEvent = new CustomEvent('newGame');
         window.dispatchEvent(newGameEvent);
     })
+
+    // SWITCH PLAYER SCREEN
+    const switchPlayerScreen = document.createElement('div');
+    switchPlayerScreen.classList.add('switchPlayerScreen');
+    switchPlayerScreen.innerHTML = "<span></span>'s turn in &nbsp;<span><span>"
+    switchPlayerScreen.style.transform = 'scale(0)'
+    content.append(switchPlayerScreen);
 
 
     function createGrid(){
@@ -101,6 +120,7 @@ exports.initiateUI = function(){
 
     function printDisplay(display, string){
         display.textContent = string;
+
         setTimeout(() => {
             display.textContent = '';
         }, 1000);
@@ -116,25 +136,59 @@ exports.initiateUI = function(){
     }
     
     return {
+        setupSplashMenu: function(callback){
+            singlePlayerBtn.addEventListener('click', ()=>{
+                callback(false);
+            });
+            twoPlayerBtn.addEventListener('click', ()=>{
+                callback(true);
+            });
+        },
         update : function(game){
+            const currentPlayer = game.currentPlayer ? 'player1' : 'player2';
+            const oppenentPlayer = game.currentPlayer ? 'player2' : 'player1';
+            this.updateGameboard(currentPlayer, 'board1', game);
+            this.updateGameboard(oppenentPlayer, 'board2', game);      
+        },
+        updateGameboard : function(player, board, game){
             for (let i = 9; i >= 0; i--){
                 for (let j = 0; j < 10; j++){
-                    const field = document.querySelector(`[data-coords="[${i},${j}]"`)
-                    const fieldData = game.players.player1.board[i][j];
+                    const field = document.querySelector(`#${board} [data-coords="[${i},${j}]"`);
+                    field.textContent = '';
+                    field.classList.remove(...field.classList);
+                    field.classList.add('field');
+
+                    const fieldData = game.players[player].board[i][j];
                     if(fieldData === 'X'){
                         field.classList.add('miss')
-                        field.style.color = 'blue'
                         field.textContent = fieldData;
                     }
                     else if(fieldData === 'O'){
+                        if(board === 'board1'){
+                            field.classList.add('ship')
+                        }
                         field.classList.add('hit')
-                        field.style.color = 'red'
                         field.textContent = fieldData;
+                        // FIND SHIP TYPE
+                        for (ship in game.players[player].ships){
+                            const shipCoords = game.players[player].ships[ship].coords;
+                            shipCoords.some(coords => {
+                                if (coords[0] === i && coords[1] === j){
+                                    if(game.players[player].ships[ship].isSunk){
+                                        return field.classList.add('sunk')
+                                    }
+                                    else{
+                                        return field.classList.add(ship);
+                                    }
+                                }
+                            })
+                        }
                     }
-                    else if (fieldData !== null){    
+                    else if (fieldData !== null && board === 'board1'){    
                         field.classList.add('ship');
                         field.classList.add(fieldData);
                     }
+
                 }
             }
         },
@@ -156,25 +210,35 @@ exports.initiateUI = function(){
             let result;
             try {
                 result = attack(coords);
+
                 let attackResult = result[0].attackResult;
-                let counterResult = result[1].attackResult;
                 printDisplay(display2, attackResult[0]);
                 this.eventListenerActive = false;
-                setTimeout(() => {
-                    printDisplay(display1, counterResult[0])
-                    if (counterResult[0] === 'SUNK!'){
-                        setShipSunk(counterResult[1], true);
-                    }
-                }, 1000);
+
+                // IF SINGLE PLAYER
+                if(!game.twoPlayer){
+                    let counterResult = result[1].attackResult;
+                    setTimeout(() => {
+                        printDisplay(display1, counterResult[0])
+                        if (counterResult[0] === 'SUNK!'){
+                            setShipSunk(counterResult[1], true);
+                        }
+                    }, 1000);
+                }
                 printResult(attackResult, event.target);
+                if (game.twoPlayer){
+                    setTimeout(() => {
+                    this.switchPlayers(game);
+                    }, 1500)
+                }
+                else {
                 setTimeout(()=>{
                     this.update(game)
                     this.eventListenerActive = true
                 }, 1000);
+            }
             } catch(error){
                 printDisplay(display2, '!');
-                console.log(error.message)
-
             }
             
             return;
@@ -186,5 +250,29 @@ exports.initiateUI = function(){
                 gameOverResult.textContent = `${winner} wins!`
         
         },
+        switchPlayers: function(game){
+            const currentPlayer = game.currentPlayer ? game.players.player1.name : game.players.player2.name;
+            const span1 = document.querySelector('.switchPlayerScreen span:first-child');
+            const span2 = document.querySelector('.switchPlayerScreen span:last-child');
+            const elementsToBlur = document.querySelectorAll('.content > *:not(.switchPlayerScreen)');
+            elementsToBlur.forEach(element => element.style.filter = 'blur(15px)');
+            player1Board.classList.toggle('hide');
+            switchPlayerScreen.style.transform = 'scale(1)';
+            span1.textContent = currentPlayer;
+            for (let i = 1; i < 4; i++){
+                setTimeout(() => {
+                    span2.textContent = 4 - i;
+                }, 1000 * i)
+            }
+            setTimeout(() => {
+                switchPlayerScreen.style.transform = 'scale(0)';
+                elementsToBlur.forEach(element => element.style.filter = 'blur(0px)');
+                this.update(game);
+                span2.textContent = '';
+                this.eventListenerActive = true;
+                player1Board.classList.toggle('hide');
+            }, 4000)
+            return;
+        }
     }
 }

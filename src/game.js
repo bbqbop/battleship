@@ -1,17 +1,18 @@
 const { Player } = require('./player');
 
-exports.Game = function(){
+exports.Game = function(twoPlayer){
     this.players = {
         player1: new Player('Player1'),
         player2: new Player('Computer'),
     };
     this.currentPlayer = true;
-    this.twoPlayer = false;
+    this.twoPlayer = twoPlayer;
     this.gameOver = false;
     this.compQueue = {lastHits: [], direction: null, cue: []};
 }
 this.Game.prototype = {
     curPlayerAttacks: function(coords){
+        if(this.gameOver) return
         let attackResult;
         let counterResult;
         if(this.currentPlayer){
@@ -29,12 +30,12 @@ this.Game.prototype = {
         return [attackResult, counterResult];
     },
     compAttack: function(){
+        if(this.gameOver) return
         let result;
         let row;
         let col;
         while(!result){
             try{
-                console.log(this.compQueue);
                 if (this.compQueue.cue.length > 0){
                     [ row, col ] = this.compQueue.cue.shift();
                 }

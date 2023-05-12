@@ -5,6 +5,7 @@
     margin: 0;
     font-family: 'Ubuntu', sans-serif;
     --shadow: 2px 2px 4px;
+    transition: all ease-in-out 350ms;
 }
 
 .header { 
@@ -113,8 +114,29 @@
     background-color: rgba(128, 128, 128, 0.3);
 }
 
+.field.hit {
+    color: red;
+}
+.field.miss {
+    color: blue;
+}
+
 .board .field.sunk {
     background-color: rgb(93, 93, 93, 0.3);
+}
+
+.switchPlayerScreen {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 3;
+    font-size: 3rem;
+}
+.board.hide > *{
+    opacity: 0;
 }
 
 @media screen and (max-width: 600px) {
