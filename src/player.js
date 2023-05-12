@@ -82,6 +82,9 @@ this.Player.prototype = {
         if(field == 'X' || field == 'O'){
             throw new Error('Invalid move, field has already been attacked');
         }
+        if(row < 0 || row > 9 || col < 0 || col > 9){
+            throw new Error('Invalid move, coordinates out of bounds')
+        }
         if(field != null){
             attackResult = this.ships[field].hit()
             this.checkStatus();

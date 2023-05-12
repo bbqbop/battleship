@@ -8,7 +8,7 @@ exports.Game = function(){
     this.currentPlayer = true;
     this.twoPlayer = false;
     this.gameOver = false;
-    this.compQueue = {lastHits: [],direction: null, cue: []};
+    this.compQueue = {lastHits: [], direction: null, cue: []};
 }
 this.Game.prototype = {
     curPlayerAttacks: function(coords){
@@ -47,16 +47,10 @@ this.Game.prototype = {
                     this.fillQueue(row, col);
                 }
                 if (result.attackResult[0] === 'SUNK!'){
-                    this.clearQueueDirection(row, col);
+                    this.clearQueue(result.attackResult[1].coords);
                 }
             } catch{
-                if (this.compQueue.cue.length > 0){
-                    [ row, col ] = this.compQueue.cue.shift();
-                }
-                else{ 
-                    row = Math.floor(Math.random() * 10);
-                    col = Math.floor(Math.random() * 10);
-                }
+                continue
             }
         }
         return result;
@@ -65,58 +59,87 @@ this.Game.prototype = {
         // if hit is second hit
             // compare with last hit
         if (this.compQueue.lastHits.length > 0){
-            const [lastRow, lastCol] = this.compQueue.lastHits.shift();
-            // if vertical
-            if (row === lastRow + 1 || row === lastRow - 1 && col === lastCol){
-                this.compQueue.direction = 'vertical'
-                const fieldsInCol = [[row+1,col],[row-1,col],[lastRow+1, col],[lastRow-1, col]]
-                fieldsInCol.forEach(coord => this.compQueue.cue.unshift(coord))
-
+            if (!this.compQueue.direction){
+                this.trackDirection(row, col);
             }
-            // if horizontal
-            else {
-                this.compQueue.direction = 'horizontal'
-                const fieldsInRow = [[row,col+1],[row,col-1],[row, lastCol+1],[row, lastCol-1]]
-                fieldsInRow.forEach(coord => this.compQueue.cue.unshift(coord)
-                )
-
+            const [lastRow, lastCol] = this.compQueue.lastHits[this.compQueue.lastHits.length - 1];
+            
+            let fieldsInDirection;
+            if (this.compQueue.direction === 'vertical'){
+                fieldsInDirection = [[row+1,col],[row-1,col],[lastRow+1, col],[lastRow-1, col]]
             }
+            else if (this.compQueue.direction === 'horizontal'){
+                fieldsInDirection = [[row,col+1],[row,col-1],[row, lastCol+1],[row, lastCol-1]]
+            }  
+                
+            fieldsInDirection.forEach(coord => {
+                const isInCue = this.compQueue.cue.some(arr => {
+                    return JSON.stringify(arr) === JSON.stringify(coord)
+                })
+                if(!isInCue){
+                    this.compQueue.cue.unshift(coord)
+                }
+            })
         }
+
         this.compQueue.lastHits.push([row,col]);
-        
+
         const surroundingCoords = [
             [row, col+1], [row+1, col],
             [row, col-1], [row-1, col]
         ]
-
         surroundingCoords.forEach(coord => {
             if(coord[0] >= 0 && coord[0] <= 9 && coord[1] >= 0 && coord[1] <= 9){
                 this.compQueue.cue.push(coord);
             }
         })
+        
     },
-    clearQueueDirection: function(row, col){
-        if (this.compQueue.direction === 'horizontal'){
-            this.compQueue.lastHits.forEach(entry => {
-                if(entry[0] === row){
-                    // console.log('here', row, col)
-                    const idx = this.compQueue.lastHits.indexOf(entry);
-                    this.compQueue.lastHits.splice(idx, 1)
-                    console.log('spliceHor', this.compQueue.lastHits.splice(idx, 1))
+    clearQueue: function(shipCoords){
+        console.log(shipCoords)
+        shipCoords.forEach(x => {
+            this.compQueue.lastHits.some(y => {
+                strX = JSON.stringify(x);
+                strY = JSON.stringify(y);
+                if (strX === strY){
+                    const idx = this.compQueue.lastHits.findIndex(z => {
+                        return JSON.stringify(z) === strY;
+                    })
+                    console.log(this.compQueue.lastHits.splice(idx, 1));
                 }
             })
+        })
+        // this.trackDirection(row, col);
+        // this.compQueue.lastHits.forEach(entry => {
+        //     if(
+        //         entry[0] === row && this.compQueue.direction === 'horizontal' ||
+        //         entry[1] === col && this.compQueue.direction === 'vertical'
+        //     ){
+        //         const idx = this.compQueue.lastHits.findIndex(coord => {
+        //             return coord[0] === entry[0] && coord[1] === entry[1]
+        //         });
+        //         if (idx !== -1) {
+        //         let spliced = this.compQueue.lastHits.splice(idx, 1)
+        //         console.log('splice', spliced)
+        //         }
+        //     }
+        // })
+        this.compQueue.direction = null;
+    },
+    trackDirection: function(row, col){
+        const [lastRow, lastCol] = this.compQueue.lastHits[this.compQueue.lastHits.length - 1];
+        console.log(lastRow, row, lastCol, col)
+        if (row === lastRow + 1 && col === lastCol || row === lastRow - 1 && col === lastCol){
+            console.log('vert')
+            this.compQueue.direction = 'vertical'
         }
-        else {
-            this.compQueue.lastHits.forEach(entry => {
-                if(entry[1] === col){
-                    const idx = this.compQueue.lastHits.indexOf(entry);
-                    this.compQueue.lastHits.splice(idx, 1)
-                    console.log('spliceVert', this.compQueue.lastHits.splice(idx, 1))
-                }
-            })
-        }
-    }
+        else if (col === lastCol + 1 && row === lastRow || col === lastCol - 1 && row === lastRow){
+            console.log('hori')
 
-};
+            this.compQueue.direction = 'horizontal'
+        }
+        return;
+    }
+}
 
 
