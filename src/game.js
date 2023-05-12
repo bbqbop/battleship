@@ -96,7 +96,6 @@ this.Game.prototype = {
         
     },
     clearQueue: function(shipCoords){
-        console.log(shipCoords)
         shipCoords.forEach(x => {
             this.compQueue.lastHits.some(y => {
                 strX = JSON.stringify(x);
@@ -105,36 +104,22 @@ this.Game.prototype = {
                     const idx = this.compQueue.lastHits.findIndex(z => {
                         return JSON.stringify(z) === strY;
                     })
-                    console.log(this.compQueue.lastHits.splice(idx, 1));
+                    this.compQueue.lastHits.splice(idx, 1);
                 }
             })
         })
-        // this.trackDirection(row, col);
-        // this.compQueue.lastHits.forEach(entry => {
-        //     if(
-        //         entry[0] === row && this.compQueue.direction === 'horizontal' ||
-        //         entry[1] === col && this.compQueue.direction === 'vertical'
-        //     ){
-        //         const idx = this.compQueue.lastHits.findIndex(coord => {
-        //             return coord[0] === entry[0] && coord[1] === entry[1]
-        //         });
-        //         if (idx !== -1) {
-        //         let spliced = this.compQueue.lastHits.splice(idx, 1)
-        //         console.log('splice', spliced)
-        //         }
-        //     }
-        // })
         this.compQueue.direction = null;
+        if (this.compQueue.lastHits.length > 0){
+            const [row, col] = this.compQueue.lastHits.pop()
+            this.fillQueue(row, col);
+        }
     },
     trackDirection: function(row, col){
         const [lastRow, lastCol] = this.compQueue.lastHits[this.compQueue.lastHits.length - 1];
-        console.log(lastRow, row, lastCol, col)
         if (row === lastRow + 1 && col === lastCol || row === lastRow - 1 && col === lastCol){
-            console.log('vert')
             this.compQueue.direction = 'vertical'
         }
         else if (col === lastCol + 1 && row === lastRow || col === lastCol - 1 && row === lastRow){
-            console.log('hori')
 
             this.compQueue.direction = 'horizontal'
         }
