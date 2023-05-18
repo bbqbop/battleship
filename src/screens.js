@@ -2,12 +2,7 @@ exports.initiateScreens = function(){
     const menus = document.querySelector('.menus');
 
      // SWITCH PLAYER SCREEN
-     const switchPlayerScreen = document.createElement('div');
-     switchPlayerScreen.classList.add('switchPlayerScreen');
-     switchPlayerScreen.innerHTML = "<span></span>'s turn in &nbsp;<span><span>"
-     switchPlayerScreen.style.transform = 'scale(0)'
-     menus.append(switchPlayerScreen);
-
+     
     return {
         enterNames: function(game){
             return new Promise((resolve, reject) => {
@@ -48,7 +43,7 @@ exports.initiateScreens = function(){
             return new Promise((resolve, reject) => {
                 let curPlayer = player || 'player1';
                 const setupContainer = document.createElement('div');
-                setupContainer.classList.add('setupContainer');
+                setupContainer.classList.add(`setup`);
                 const title = document.createElement('h1');
                 title.textContent = `${game.players[curPlayer].name} place your ships`;
                 board.id = 'board1';
@@ -97,6 +92,9 @@ exports.initiateScreens = function(){
                         fields.forEach(field => {
                             field.classList.remove(...field.classList);
                             field.classList.add('field');
+                            field.removeEventListener('dragenter', dragEnter);
+                            field.removeEventListener('dragover', dragOver);
+                            field.removeEventListener('drop', dragDrop);
                         });
                         menus.removeChild(setupContainer);
 
@@ -143,6 +141,7 @@ exports.initiateScreens = function(){
                         angle = angle === 0 ? 90 : 0;
                         ship.style.transform = `rotate(${angle}deg)`
                         ship.dataset.direction = angle === 0 ? 'horizontal' : 'vertical';
+
                     })
                     }
                 }
@@ -157,15 +156,14 @@ exports.initiateScreens = function(){
                 // Drag & Drop functions//
                 //////////////////////////
 
-                let draggedItem;
+                let draggedShip;
                 let fieldsArr = [];
                 let vert = false;
                 let invalid = false;
 
                 function dragStart(e){
-                    draggedItem = e.target;
-                    console.log(draggedItem);
-                    vert = draggedItem.dataset.direction === 'vertical' ? true : false;
+                    draggedShip = e.target;
+                    vert = draggedShip.dataset.direction === 'vertical';
 
                     // create copy of ship in container to allow rotated drag image
                     const dragImageContainer = document.createElement('div');
@@ -178,6 +176,8 @@ exports.initiateScreens = function(){
                     dragImageContainer.append(copy);
                     document.body.append(dragImageContainer);
                     e.dataTransfer.setDragImage(dragImageContainer, 0, 0);
+
+                    e.dataTransfer.setData('text/plain', ''); // Set data to enable dragging in Firefox
 
                     setTimeout(() => this.style.display = 'none', 0);
                 };
@@ -194,7 +194,7 @@ exports.initiateScreens = function(){
                     invalid = false; 
 
                     // add adjacent fields
-                    const length = parseInt(draggedItem.style.width.slice(0,-2)) / 30 - 1
+                    const length = parseInt(draggedShip.style.width.slice(0,-2)) / 30 - 1
                     const coords = e.target.dataset.coords;
                     clearFieldsArr();
                     populateArray(length, coords);
@@ -211,15 +211,16 @@ exports.initiateScreens = function(){
                     if(invalid){
                         return;
                     }
+                    
                     const x = parseInt(e.target.dataset.coords[1]);
                     const y = parseInt(e.target.dataset.coords[3]);
-                    const length = parseInt(draggedItem.style.width.slice(0,-2)) / 30;
-                    const initial = draggedItem.classList[2];
+                    const length = parseInt(draggedShip.style.width.slice(0,-2)) / 30;
+                    const initial = draggedShip.classList[2];
                     const startPos = [x, y];
 
                     game.players[curPlayer].placeShip(length, initial, startPos, vert)
                     update(curPlayer, 'board1', game)
-                    shipsPreview.removeChild(draggedItem);
+                    shipsPreview.removeChild(draggedShip);
                 };
 
                 // helper functions
@@ -252,28 +253,35 @@ exports.initiateScreens = function(){
             })
         },
         switchPlayers: async function(game){
-                const currentPlayer = game.currentPlayer ? game.players.player1.name : game.players.player2.name;
-                const span1 = document.querySelector('.switchPlayerScreen span:first-child');
-                const span2 = document.querySelector('.switchPlayerScreen span:last-child');
-                const board1 = document.querySelector('#board1');
-                const elementsToBlur = document.querySelectorAll('.content > *:not(.switchPlayerScreen)');
-                elementsToBlur.forEach(element => element.style.filter = 'blur(15px)');
-                board1.classList.toggle('hide');
-                switchPlayerScreen.style.transform = 'scale(1)';
-                span1.textContent = currentPlayer;
-                for (let i = 1; i < 4; i++){
-                    setTimeout(() => {
-                        span2.textContent = 4 - i;
-                    }, 1000 * i)
-                }
+            const switchPlayerScreen = document.createElement('div');
+            switchPlayerScreen.classList.add('switchPlayerScreen');
+            switchPlayerScreen.innerHTML = "<span></span>'s turn in &nbsp;<span><span>"
+            switchPlayerScreen.style.transform = 'scale(0)'
+            menus.append(switchPlayerScreen);
+
+            const currentPlayer = game.currentPlayer ? game.players.player1.name : game.players.player2.name;
+            const span1 = document.querySelector('.switchPlayerScreen span:first-child');
+            const span2 = document.querySelector('.switchPlayerScreen span:last-child');
+            const board1 = document.querySelector('#board1');
+            const elementsToBlur = document.querySelectorAll('.content > *:not(.switchPlayerScreen)');
+            elementsToBlur.forEach(element => element.style.filter = 'blur(15px)');
+            board1.classList.toggle('hide');
+            switchPlayerScreen.style.transform = 'scale(1)';
+            span1.textContent = currentPlayer;
+            for (let i = 1; i < 4; i++){
                 setTimeout(() => {
-                    switchPlayerScreen.style.transform = 'scale(0)';
-                    elementsToBlur.forEach(element => element.style.filter = 'blur(0px)');
-                    span2.textContent = '';
-                    this.eventListenerActive = true;
-                    board1.classList.toggle('hide');
-                }, 4000)
-                return;
+                    span2.textContent = 4 - i;
+                }, 1000 * i)
+            }
+            setTimeout(() => {
+                switchPlayerScreen.style.transform = 'scale(0)';
+                elementsToBlur.forEach(element => element.style.filter = 'blur(0px)');
+                span2.textContent = '';
+                this.eventListenerActive = true;
+                board1.classList.toggle('hide');
+                menus.removeChild(switchPlayerScreen);
+            }, 4000)
+            return;
         },
     }
 };
