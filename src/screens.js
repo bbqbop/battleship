@@ -137,14 +137,15 @@ exports.initiateScreens = function(){
                 ////////////////
                 // Drag and Drop
                 ////////////////
-                let angle = 0;
                 const previewShips = shipsPreview.querySelectorAll('div');
                 previewShips.forEach(ship => {
+                    let angle = 0;
                     ship.addEventListener('dragstart', dragStart);
                     ship.addEventListener('dragend', dragEnd);
                     ship.addEventListener('dblclick', () => {
                         angle = angle === 0 ? 90 : 0;
                         ship.style.transform = `rotate(${angle}deg)`
+                        ship.dataset.direction = angle === 0 ? 'horizontal' : 'vertical';
                     })
                 })
                 // document.addEventListener('drag', handleDrag);
@@ -159,22 +160,14 @@ exports.initiateScreens = function(){
 
                 // Drag functions
                     // Ships
-                let offsetL;
-                let offsetR;
-                let offsetU;
-                let offsetD;
                 let draggedItem;
                 let fieldsArr = [];
                 let vert = false;
                 let invalid = false;
 
                 function dragStart(e){
-                    const draggedRect = this.getBoundingClientRect();
-                    offsetL = e.clientX - draggedRect.left;
-                    offsetR = draggedRect.width - offsetL;
-                    offsetU = e.clientY - draggedRect.top;
-                    offsetD = draggedRect.height - offsetU;
                     draggedItem = e.target;
+                    vert = draggedItem.dataset.direction === 'vertical' ? true : false;
 
                     // create copy of ship in container to allow rotated drag image
                     const dragImageContainer = document.createElement('div');
@@ -182,6 +175,7 @@ exports.initiateScreens = function(){
                     dragImageContainer.style.position = 'absolute';
                     dragImageContainer.style.top = '-150px';
                     const copy = this.cloneNode(true);
+                    const angle = vert ? 90 : 0;
                     copy.style.transform = `rotate(${angle}deg)`;
                     dragImageContainer.append(copy);
                     document.body.append(dragImageContainer);
@@ -193,62 +187,31 @@ exports.initiateScreens = function(){
                     this.style.display = 'flex';
                     const dragImage = document.querySelector('#dragImage');
                     document.body.removeChild(dragImage);
-                    offsetL = null;
-                    offsetR = null;
-                    offsetU = null;
-                    offsetD = null;
                     clearFieldsArr();
+                    vert = false;
                 };
                 function dragEnter(e){
-                    invalid = false;
-                    if(offsetU > 30 || offsetD > 30){
-                        vert = true;
-                    }   
-                    const fieldsUp = (offsetU - offsetU % 30) / 30;
-                    const fieldsDown = (offsetD - offsetD % 30) / 30;
-                    const fieldsLeft = (offsetL - offsetL % 30) / 30;
-                    const fieldsRight = (offsetR - offsetR % 30) / 30;
-
+                    invalid = false; 
                     // add adjacent fields
-
+                    const length = parseInt(draggedItem.style.width.slice(0,-2)) / 30 - 1
                     const coords = e.target.dataset.coords;
                     
                     clearFieldsArr();
-                    if(vert){
-                        populateArray('up', fieldsUp, coords);
-                        populateArray('down', fieldsDown, coords);
-                    }
-                    else {
-                        populateArray('left', fieldsLeft, coords);
-                        populateArray('right', fieldsRight, coords);
-                    }
-
-                    // console.log(fieldsUp, fieldsDown, fieldsLeft, fieldsRight) 
+                    populateArray(length, coords);
+                   
                     const classToAdd = invalid ? 'invalid' : 'hover'                
                     fieldsArr.forEach(field => field.classList.add(classToAdd))
                 };
 
-                function populateArray(direction, num, coords){
+                function populateArray(num, coords){
                     const x = parseInt(coords[1]);
                     const y = parseInt(coords[3]);
                     let col;
                     let row;
                     for (let i = 0 ; i <= num; i++){
-                        switch (direction){
-                            case 'up' : 
-                                [col, row] = [x + i, y];
-                                break;
-                            case 'down' : 
-                                [col, row] = [x - i, y];
-                                break;
-                            case 'left' :
-                                [col, row] = [x, y - i];
-                                break;
-                            case 'right' :
-                                [col, row] = [x, y + i];
-                        }
+                        [col, row] = vert ? [x - i, y] : [x, y + i];
                         const field = document.querySelector(`[data-coords="[${col},${row}]"]`)
-                        if (field === null){
+                        if (field === null || field.classList[1] === 'ship'){
                             invalid = true;
                         } else {
                             fieldsArr.push(field)
@@ -267,11 +230,15 @@ exports.initiateScreens = function(){
                     if(invalid){
                         return;
                     }
-                    const length = draggedItem.offsetWidth / 30;
+                    const x = parseInt(e.target.dataset.coords[1]);
+                    const y = parseInt(e.target.dataset.coords[3]);
+                    const length = parseInt(draggedItem.style.width.slice(0,-2)) / 30;
                     const initial = draggedItem.classList[2];
-                    const startPos = e.target.dataset.coords;
-                    
-                    // game.players[curPlayer].placeShip()
+                    const startPos = [x, y];
+
+                    game.players[curPlayer].placeShip(length, initial, startPos, vert)
+                    update(curPlayer, 'board1', game)
+                    shipsPreview.removeChild(draggedItem);
                 };
 
                 function clearFieldsArr() {

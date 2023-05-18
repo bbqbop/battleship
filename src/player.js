@@ -13,12 +13,12 @@ this.Player.prototype = {
         this.ships[initial] = new Ship(length);
         for (i = 0; i < length; i++){
             if(isVert){
-                this.board[row][col - i] = initial;
-                this.ships[initial].coords.push([row, col - i])
+                this.board[row - i][col] = initial;
+                this.ships[initial].coords.push([row - i, col])
             }
             else{
-                this.board[row + i][col] = initial;
-                this.ships[initial].coords.push([row + i, col])
+                this.board[row][col + i] = initial;
+                this.ships[initial].coords.push([row, col + i])
 
             }
         }        
@@ -26,12 +26,12 @@ this.Player.prototype = {
     testShipPlacement: function(length, row, col , isVert){
         for (i = 0; i < length; i++){
             if(isVert){
-                if(this.board[row][col - i] !== null){
+                if(this.board[row - i][col] !== null){
                     throw new Error('Invalid placement.');
                 }
             }
             else{
-                if(this.board[row + i][col] !== null){
+                if(this.board[row][col + i] !== null){
                     throw new Error('Invalid placement.');
                 }
             }
