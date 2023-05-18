@@ -9,7 +9,7 @@ exports.Game = function(twoPlayer){
     this.twoPlayer = twoPlayer;
     this.gameOver = false;
     this.compQueue = {lastHits: [], direction: null, cue: []};
-    this.gameMode = {
+    this.gameModes = {
         modern: {
             ships: [[5,'A','Carrier'],[4,'B','Battleship'],[3,'C','Cruiser'],[3,'S','Submarine'],[2,'D', 'Destroyer']],
         },

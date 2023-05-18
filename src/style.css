@@ -108,7 +108,7 @@
 }
 
 .ship.preview {
-    position: absolute;
+    transform-origin: top left;
 }
 
 .rotated {

@@ -236,9 +236,10 @@ exports.initiateUI = function(){
                 }
                 if (game.twoPlayer){
                     setTimeout(() => {
-                    screens.switchPlayers(game);
-                    this.update(game);
-                    }, 1500)
+                        screens.switchPlayers(game);
+                        setTimeout(()=>this.update(game), 1000);
+                        this.eventListenerActive = true
+                    }, 1000)
                 }
                 else {
                 setTimeout(()=>{

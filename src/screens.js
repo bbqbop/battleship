@@ -78,49 +78,54 @@ exports.initiateScreens = function(){
                 const randomBtn = document.createElement('button');
                 randomBtn.textContent = 'Random';
                 randomBtn.addEventListener('click', () => {
-                    game.players[curPlayer].populateGameboard(game.gameMode[gameMode]);
+                    game.players[curPlayer].populateGameboard(game.gameModes[gameMode]);
                     update(curPlayer, 'board1', game);
+                    shipsPreview.innerHTML = '';
                 });
 
                 startGameBtn = document.createElement('button');
                 startGameBtn.textContent = game.twoPlayer && curPlayer !== 'player2' ? 'Next' : 'Start Game'
                 startGameBtn.addEventListener('click', () => {
+                    if (shipsPreview.childElementCount !== 0){
+                        error.textContent = 'place all remaining ships!'
+                        return;
+                    }
                     if (startGameBtn.textContent === 'Next'){
                         game.currentPlayer = !game.currentPlayer;
                         this.switchPlayers(game);
                         
-                        // clear screen
-                        setupContainer.innerHTML = '';
                         fields.forEach(field => {
-                            field.classList.remove('ship');
+                            field.classList.remove(...field.classList);
+                            field.classList.add('field');
                         });
+                        menus.removeChild(setupContainer);
 
                         setTimeout(() => {
-                            this.setupGameboard(game, board, update, 'player2', gameMode);
+                            return resolve(this.setupGameboard(game, board, update, 'player2', gameMode));
                         },4000);
                     }
                     else {
                         if (!game.twoPlayer){
-                            game.players.player2.populateGameboard(game.gameMode[gameMode]);
+                            game.players.player2.populateGameboard(game.gameModes[gameMode]);
                         }
-                        if (shipsPreview.childElementCount !== 0){
-
-                            error.textContent = 'place all remaining ships!'
-                            return;
-                        }
-                        setupContainer.innerHTML = '';
+                        menus.removeChild(setupContainer);
+                        game.currentPlayer = true;
+                        this.switchPlayers(game);
                         return resolve();
                     }
                 });
 
-                // Ships preview
+                ///////////////////
+                // Ships preview //
+                ///////////////////
+
                 const shipsPreview = document.createElement('div');
                 shipsPreview.classList.add('shipsPreview');
 
                 function printShips(){
                     shipsPreview.innerHTML = '';
                     let boxSize = 30;
-                    let shipsList = game.gameMode[gameMode].ships;
+                    let shipsList = game.gameModes[gameMode].ships;
                     for (let i = 0; i < shipsList.length; i++){
                         const ship = document.createElement('div');
                         ship.classList.add('preview', 'ship', shipsList[i][1]);
@@ -130,36 +135,28 @@ exports.initiateScreens = function(){
                         ship.style.fontSize = `calc(0.3rem * ${shipsList[i][0]})`
                         ship.draggable = true;
                         shipsPreview.append(ship);
-                    }
-                }
-                printShips()
 
-                ////////////////
-                // Drag and Drop
-                ////////////////
-                const previewShips = shipsPreview.querySelectorAll('div');
-                previewShips.forEach(ship => {
-                    let angle = 0;
-                    ship.addEventListener('dragstart', dragStart);
-                    ship.addEventListener('dragend', dragEnd);
-                    ship.addEventListener('dblclick', () => {
+                        let angle = 0;
+                        ship.addEventListener('dragstart', dragStart);
+                        ship.addEventListener('dragend', dragEnd);
+                        ship.addEventListener('dblclick', () => {
                         angle = angle === 0 ? 90 : 0;
                         ship.style.transform = `rotate(${angle}deg)`
                         ship.dataset.direction = angle === 0 ? 'horizontal' : 'vertical';
                     })
-                })
-                // document.addEventListener('drag', handleDrag);
+                    }
+                }
+                printShips()
 
                 fields.forEach(field => {
                     field.addEventListener('dragenter', dragEnter);
                     field.addEventListener('dragover', dragOver);
-                    field.addEventListener('dragleave', dragLeave);
                     field.addEventListener('drop', dragDrop);
                 })
+                //////////////////////////
+                // Drag & Drop functions//
+                //////////////////////////
 
-
-                // Drag functions
-                    // Ships
                 let draggedItem;
                 let fieldsArr = [];
                 let vert = false;
@@ -167,6 +164,7 @@ exports.initiateScreens = function(){
 
                 function dragStart(e){
                     draggedItem = e.target;
+                    console.log(draggedItem);
                     vert = draggedItem.dataset.direction === 'vertical' ? true : false;
 
                     // create copy of ship in container to allow rotated drag image
@@ -183,6 +181,7 @@ exports.initiateScreens = function(){
 
                     setTimeout(() => this.style.display = 'none', 0);
                 };
+
                 function dragEnd(){
                     this.style.display = 'flex';
                     const dragImage = document.querySelector('#dragImage');
@@ -190,12 +189,13 @@ exports.initiateScreens = function(){
                     clearFieldsArr();
                     vert = false;
                 };
+
                 function dragEnter(e){
                     invalid = false; 
+
                     // add adjacent fields
                     const length = parseInt(draggedItem.style.width.slice(0,-2)) / 30 - 1
                     const coords = e.target.dataset.coords;
-                    
                     clearFieldsArr();
                     populateArray(length, coords);
                    
@@ -203,27 +203,8 @@ exports.initiateScreens = function(){
                     fieldsArr.forEach(field => field.classList.add(classToAdd))
                 };
 
-                function populateArray(num, coords){
-                    const x = parseInt(coords[1]);
-                    const y = parseInt(coords[3]);
-                    let col;
-                    let row;
-                    for (let i = 0 ; i <= num; i++){
-                        [col, row] = vert ? [x - i, y] : [x, y + i];
-                        const field = document.querySelector(`[data-coords="[${col},${row}]"]`)
-                        if (field === null || field.classList[1] === 'ship'){
-                            invalid = true;
-                        } else {
-                            fieldsArr.push(field)
-                        }
-                    }
-                }
-
                 function dragOver(e){
                     e.preventDefault();
-                };
-
-                function dragLeave(){
                 };
 
                 function dragDrop(e){
@@ -241,21 +222,31 @@ exports.initiateScreens = function(){
                     shipsPreview.removeChild(draggedItem);
                 };
 
+                // helper functions
+
+                function populateArray(num, coords){
+                    const x = parseInt(coords[1]);
+                    const y = parseInt(coords[3]);
+                    let col;
+                    let row;
+                    for (let i = 0 ; i <= num; i++){
+                        [col, row] = vert ? [x - i, y] : [x, y + i];
+                        const field = document.querySelector(`[data-coords="[${col},${row}]"]`)
+                        if (field === null || field.classList[1] === 'ship'){
+                            invalid = true;
+                        } else {
+                            fieldsArr.push(field)
+                        }
+                    }
+                }
+                
                 function clearFieldsArr() {
                     fieldsArr.forEach((field) => {
                       field.classList.remove('hover', 'invalid');
                     });
                     fieldsArr = [];
                 }
-                // function handleDrag(e){
-                //     console.log('here')
-                //     draggedItem.style.transform = `translateXe.clientX;
-                //     draggedItem.style.top = e.clientY;
-                // }
-                
-
-
-                
+                            
                 setupContainer.append(title, gameModeSelect, randomBtn, startGameBtn, error, board, shipsPreview);
                 menus.append(setupContainer);
             })
