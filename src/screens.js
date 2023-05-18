@@ -1,12 +1,35 @@
 exports.initiateScreens = function(){
     const menus = document.querySelector('.menus');
 
-     // SWITCH PLAYER SCREEN
-     
     return {
+        splash: function(startGame){
+            const splash = document.createElement('div');
+            splash.classList.add('splash');
+            const singlePlayerBtn = document.createElement('button');
+            singlePlayerBtn.id = 'singlePlayerBtn'
+            singlePlayerBtn.textContent = 'Single player'
+            const twoPlayerBtn = document.createElement('button');
+            twoPlayerBtn.id = 'twoPlayerBtn'
+            twoPlayerBtn.textContent = 'Two players'
+            splash.append(singlePlayerBtn, twoPlayerBtn);
+            menus.append(splash)
+
+            singlePlayerBtn.addEventListener('click', ()=>{
+                splash.style.transform = 'scale(0)';
+                startGame(false);
+                setTimeout(()=> menus.removeChild(splash), 0);
+            });
+            twoPlayerBtn.addEventListener('click', ()=>{
+                splash.style.transform = 'scale(0)'
+                startGame(true);
+                setTimeout(()=> menus.removeChild(splash), 0);
+            });
+            
+        },
         enterNames: function(game){
             return new Promise((resolve, reject) => {
                 const enterNameForm = document.createElement('form');
+                enterNameForm.classList.add('enterNames');
                 const label = document.createElement('label');
                 const nameInp = document.createElement('input');
                 nameInp.placeholder = 'Player 1'
@@ -33,6 +56,7 @@ exports.initiateScreens = function(){
                     else {
                         enterNameForm.style.transform = 'scale(0)';
                         resolve();
+                        setTimeout(()=> menus.removeChild(enterNameForm), 0);
                     }
                 })
             });
@@ -282,6 +306,31 @@ exports.initiateScreens = function(){
                 menus.removeChild(switchPlayerScreen);
             }, 4000)
             return;
+        },
+        gameOver: function(winner){
+            const gameOver = document.createElement('div');
+            gameOver.classList.add('gameOverScreen');
+            const gameOverTitle = document.createElement('h1');
+            gameOverTitle.textContent = 'GAME OVER'
+            const gameOverResult = document.createElement('h2');
+            const newGameBtn = document.createElement('button');
+            newGameBtn.textContent = 'Start new game';
+            gameOver.append(gameOverTitle, gameOverResult, newGameBtn);
+            gameOver.style.transform = 'scale(0)';
+            menus.append(gameOver);
+
+            this.eventListenerActive = false; 
+            gameOver.style.transform = 'scale(1)';
+            player1Board.style.filter = 'blur(5px)'
+            player2Board.style.filter = 'blur(5px)'
+            gameOverResult.textContent = `${winner} wins!`
+            newGameBtn.addEventListener('click', () => {
+                gameOver.style.transform = 'scale(0)';
+                player1Board.style.filter = '';
+                player2Board.style.filter = '';
+                splash.style.transform = 'scale(1)';
+                setTimeout(()=> menus.removeChild(gameOver), 0);
+            })
         },
     }
 };

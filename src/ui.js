@@ -7,18 +7,6 @@ exports.initiateUI = function(){
     const menus = document.querySelector('.menus');
     content.innerHTML = '';
 
-    // Splash page
-    const splash = document.createElement('div');
-    splash.classList.add('splash');
-    const singlePlayerBtn = document.createElement('button');
-    singlePlayerBtn.id = 'singlePlayerBtn'
-    singlePlayerBtn.textContent = 'Single player'
-    const twoPlayerBtn = document.createElement('button');
-    twoPlayerBtn.id = 'twoPlayerBtn'
-    twoPlayerBtn.textContent = 'Two players'
-    splash.append(singlePlayerBtn, twoPlayerBtn);
-    menus.append(splash)
-
     // GameBoards
 
     const gameDiv = document.createElement('div');
@@ -34,22 +22,8 @@ exports.initiateUI = function(){
     display2.classList.add('display');
     display2.id = 'display2';
 
-   
     gameDiv.append(player1Board, display1, player2Board, display2);
     content.append(gameDiv)
-
-    // GAMEOVER SCREEN
-
-    const gameOver = document.createElement('div');
-    gameOver.classList.add('gameOverScreen');
-    const gameOverTitle = document.createElement('h1');
-    gameOverTitle.textContent = 'GAME OVER'
-    const gameOverResult = document.createElement('h2');
-    const newGameBtn = document.createElement('button');
-    newGameBtn.textContent = 'Start new game';
-    gameOver.append(gameOverTitle, gameOverResult, newGameBtn);
-    gameOver.style.transform = 'scale(0)';
-    menus.append(gameOver);
 
     function createGrid(){
         const board = document.createElement('div');
@@ -128,19 +102,6 @@ exports.initiateUI = function(){
     }
     
     return {
-        setupSplashMenu: function(startGame){
-            singlePlayerBtn.addEventListener('click', ()=>{
-                splash.style.transform = 'scale(0)';
-                startGame(false);
-            });
-            twoPlayerBtn.addEventListener('click', ()=>{
-                // gameDiv.classList.remove('hidden');
-                splash.style.transform = 'scale(0)'
-                // gameDiv.style.transform = 'scale(1)';
-                startGame(true);
-            });
-            
-        },
         gameSetup: async function(game){
             await screens.enterNames(game);
             const userBoard = createGrid();
@@ -254,18 +215,10 @@ exports.initiateUI = function(){
             return;
         },
         toggleGameOver: function(winner){
-                this.eventListenerActive = false; 
-                gameOver.style.transform = 'scale(1)';
-                player1Board.style.filter = 'blur(5px)'
-                player2Board.style.filter = 'blur(5px)'
-                gameOverResult.textContent = `${winner} wins!`
-                newGameBtn.addEventListener('click', () => {
-                    gameOver.style.transform = 'scale(0)';
-                    player1Board.style.filter = '';
-                    player2Board.style.filter = '';
-                    splash.style.transform = 'scale(1)';
-                })
-        
+            screens.gameOver(winner);
         },
+        setupSplash: function(startGame){
+            screens.splash(startGame);
+        }
     }
 }

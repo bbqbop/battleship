@@ -4,7 +4,7 @@ import './style.css';
 
 let newGame; 
 let UI = initiateUI();
-UI.setupSplashMenu(startGame);
+UI.setupSplash(startGame);
 
 async function startGame(twoPlayer){
     newGame = new Game(twoPlayer);
