@@ -9,6 +9,14 @@ exports.Game = function(twoPlayer){
     this.twoPlayer = twoPlayer;
     this.gameOver = false;
     this.compQueue = {lastHits: [], direction: null, cue: []};
+    this.gameMode = {
+        modern: {
+            ships: [[5,'A','Carrier'],[4,'B','Battleship'],[3,'C','Cruiser'],[3,'S','Submarine'],[2,'D', 'Destroyer']],
+        },
+        classic: {
+            ships: [[5,'A','Carrier'],[4,'B','Battleship'],[3,'C','Cruiser'],[2,'D1','Destroyer 1'],[2,'D2','Destroyer 2'],[1,'S1','Submarine 1'],[1,'S2','Submarine 2']]
+        },
+    }
 }
 this.Game.prototype = {
     curPlayerAttacks: function(coords){

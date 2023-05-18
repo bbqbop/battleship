@@ -1,5 +1,10 @@
+const { initiateScreens } = require('./screens');
+const screens = initiateScreens();
+
 exports.initiateUI = function(){
     const content = document.querySelector('.content');
+    const header = document.querySelector('.header');
+    const menus = document.querySelector('.menus');
     content.innerHTML = '';
 
     // Splash page
@@ -12,10 +17,12 @@ exports.initiateUI = function(){
     twoPlayerBtn.id = 'twoPlayerBtn'
     twoPlayerBtn.textContent = 'Two players'
     splash.append(singlePlayerBtn, twoPlayerBtn);
-    content.append(splash)
+    menus.append(splash)
 
     // GameBoards
 
+    const gameDiv = document.createElement('div');
+    gameDiv.classList.add('gameDiv', 'hidden');
     const player1Board = createGrid();
     player1Board.id = 'board1';
     const player2Board = createGrid();
@@ -28,7 +35,8 @@ exports.initiateUI = function(){
     display2.id = 'display2';
 
    
-    content.append(player1Board, display1, player2Board, display2);
+    gameDiv.append(player1Board, display1, player2Board, display2);
+    content.append(gameDiv)
 
     // GAMEOVER SCREEN
 
@@ -41,23 +49,7 @@ exports.initiateUI = function(){
     newGameBtn.textContent = 'Start new game';
     gameOver.append(gameOverTitle, gameOverResult, newGameBtn);
     gameOver.style.transform = 'scale(0)';
-    content.append(gameOver);
-
-    newGameBtn.addEventListener('click', () => {
-        gameOver.style.transform = 'scale(0)';
-        player1Board.style.filter = '';
-        player2Board.style.filter = '';
-        const newGameEvent = new CustomEvent('newGame');
-        window.dispatchEvent(newGameEvent);
-    })
-
-    // SWITCH PLAYER SCREEN
-    const switchPlayerScreen = document.createElement('div');
-    switchPlayerScreen.classList.add('switchPlayerScreen');
-    switchPlayerScreen.innerHTML = "<span></span>'s turn in &nbsp;<span><span>"
-    switchPlayerScreen.style.transform = 'scale(0)'
-    content.append(switchPlayerScreen);
-
+    menus.append(gameOver);
 
     function createGrid(){
         const board = document.createElement('div');
@@ -136,13 +128,26 @@ exports.initiateUI = function(){
     }
     
     return {
-        setupSplashMenu: function(callback){
+        setupSplashMenu: function(startGame){
             singlePlayerBtn.addEventListener('click', ()=>{
-                callback(false);
+                splash.style.transform = 'scale(0)';
+                startGame(false);
             });
             twoPlayerBtn.addEventListener('click', ()=>{
-                callback(true);
+                // gameDiv.classList.remove('hidden');
+                splash.style.transform = 'scale(0)'
+                // gameDiv.style.transform = 'scale(1)';
+                startGame(true);
             });
+            
+        },
+        gameSetup: async function(game){
+            await screens.enterNames(game);
+            const userBoard = createGrid();
+            await screens.setupGameboard(game, userBoard, this.updateGameboard);
+            gameDiv.classList.remove('hidden');
+            gameDiv.style.transform = 'scale(1)';
+            return Promise.resolve();
         },
         update : function(game){
             const currentPlayer = game.currentPlayer ? 'player1' : 'player2';
@@ -226,9 +231,13 @@ exports.initiateUI = function(){
                     }, 1000);
                 }
                 printResult(attackResult, event.target);
+                if(game.gameOver){
+                    return
+                }
                 if (game.twoPlayer){
                     setTimeout(() => {
-                    this.switchPlayers(game);
+                    screens.switchPlayers(game);
+                    this.update(game);
                     }, 1500)
                 }
                 else {
@@ -244,35 +253,18 @@ exports.initiateUI = function(){
             return;
         },
         toggleGameOver: function(winner){
+                this.eventListenerActive = false; 
                 gameOver.style.transform = 'scale(1)';
                 player1Board.style.filter = 'blur(5px)'
                 player2Board.style.filter = 'blur(5px)'
                 gameOverResult.textContent = `${winner} wins!`
+                newGameBtn.addEventListener('click', () => {
+                    gameOver.style.transform = 'scale(0)';
+                    player1Board.style.filter = '';
+                    player2Board.style.filter = '';
+                    splash.style.transform = 'scale(1)';
+                })
         
         },
-        switchPlayers: function(game){
-            const currentPlayer = game.currentPlayer ? game.players.player1.name : game.players.player2.name;
-            const span1 = document.querySelector('.switchPlayerScreen span:first-child');
-            const span2 = document.querySelector('.switchPlayerScreen span:last-child');
-            const elementsToBlur = document.querySelectorAll('.content > *:not(.switchPlayerScreen)');
-            elementsToBlur.forEach(element => element.style.filter = 'blur(15px)');
-            player1Board.classList.toggle('hide');
-            switchPlayerScreen.style.transform = 'scale(1)';
-            span1.textContent = currentPlayer;
-            for (let i = 1; i < 4; i++){
-                setTimeout(() => {
-                    span2.textContent = 4 - i;
-                }, 1000 * i)
-            }
-            setTimeout(() => {
-                switchPlayerScreen.style.transform = 'scale(0)';
-                elementsToBlur.forEach(element => element.style.filter = 'blur(0px)');
-                this.update(game);
-                span2.textContent = '';
-                this.eventListenerActive = true;
-                player1Board.classList.toggle('hide');
-            }, 4000)
-            return;
-        }
     }
 }
