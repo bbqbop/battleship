@@ -66,7 +66,50 @@ input:focus {
 /* GAMESETUP */
 
 .setup{
+    position: relative;
+}
 
+.setup h1::first-line {
+    color: var(--red);
+    font-size: 1.5rem;
+}
+
+.setup .controls {
+    width: 330px;
+    display: grid;
+    grid-template-columns: 30px 120px 90px 90px;
+    grid-template-rows: 30px 30px;
+    font-size: 0.7rem;
+
+    margin: 30px 0 0;
+}
+
+.controls label {
+    display: inline-block;
+    width: 30px;
+    border: solid 1px gray;
+    border-right: none;
+    border-radius: 2px 0 0 2px;
+}
+
+.controls select {
+    display: inline-block;
+    width: 120px;
+    border: solid 1px gray;
+    border-left: none;
+    border-radius: 0 2px 2px 0;
+}
+
+.controls select:focus {
+    outline: none;
+}
+
+.controls .error {
+    font-size: 1rem;
+    width: 330px;
+    text-align: center;
+    align-self: center;
+    color: var(--red);
 }
 
 .setup .shipsPreview {

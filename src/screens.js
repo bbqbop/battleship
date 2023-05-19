@@ -106,10 +106,15 @@ exports.initiateScreens = function(){
                 const setupContainer = document.createElement('div');
                 setupContainer.classList.add(`setup`);
                 const title = document.createElement('h1');
-                title.textContent = `${game.players[curPlayer].name} place your ships`;
+                title.innerText = `${game.players[curPlayer].name}\n Place your ships`;
                 const error = document.createElement('span');
+                error.classList.add('error');
 
+                const controls = document.createElement('div');
+                controls.classList.add('controls');
                 gameMode = gameMode || 'modern';
+                const gameModeLabel = document.createElement('label');
+                gameModeLabel.textContent = 'Game mode'; 
                 const gameModeSelect = document.createElement('select');
                 const optModern = document.createElement('option');
                 optModern.textContent = 'Modern';
@@ -142,7 +147,15 @@ exports.initiateScreens = function(){
                 startGameBtn.textContent = game.twoPlayer && curPlayer !== 'player2' ? 'Next' : 'Start Game'
                 startGameBtn.addEventListener('click', async () => {
                     if (shipsPreview.childElementCount !== 0){
-                        error.textContent = 'place all remaining ships!'
+                        error.style.opacity = '0';
+                        setTimeout(()=> {
+                            error.textContent = 'place all remaining ships!'
+                            error.style.opacity = '1';
+                        }, 350);
+                        setTimeout(()=> {
+                            error.style.opacity = '0';
+                            setTimeout(()=> error.textContent = '', 350);
+                        }, 3000);
                         return;
                     }
                     setupContainer.style.opacity = '0';
@@ -174,6 +187,8 @@ exports.initiateScreens = function(){
                         }
                     }, 350)
                 });
+
+                controls.append(gameModeLabel, gameModeSelect, randomBtn, startGameBtn, error)
 
                 ///////////////////
                 // Ships preview //
@@ -352,7 +367,7 @@ exports.initiateScreens = function(){
                     fieldsArr = [];
                 }
                 
-                setupContainer.append(title, gameModeSelect, randomBtn, startGameBtn, error, board, shipsPreview);
+                setupContainer.append(title, controls, board, shipsPreview);
                 menus.append(setupContainer);
 
                 setupContainer.style.opacity = '0';
