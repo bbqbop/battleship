@@ -5,6 +5,7 @@ exports.Player = function(name){
     this.ships = {};
     this.hasLost = false;
     this.name = name;
+    this.wins = 0;
 }
 this.Player.prototype = {
     placeShip: function(length, initial, startPos, isVert){

@@ -8,16 +8,25 @@
     transition: all ease-in-out 350ms;
 }
 
+/* HEADER */
+
 .header { 
+    position: relative;
     height: 80px;
     display: flex;
     align-items: center;
-    justify-content: flex-start;
-    margin: 0 1rem;
 }
 
 #title {
+    position: absolute;
+    left: 50%;
     transform-origin: center;
+}
+
+.gameRecord {
+    position: absolute;
+    right: calc(50% - 300px);
+    text-align: right;
 }
 
 button {
@@ -45,13 +54,16 @@ input:focus {
     height: 100vh;
     width: 100vw;
     display: flex;
-    flex-direction: column;
     justify-content: center;
-    align-items: center;
+    align-items: baseline;
 }
 
 .menus * {
     z-index: 999;
+}
+
+.splash, .enterNames {
+    transform: translateY(30vh);
 }
 
 /* GAMESETUP */
@@ -121,7 +133,7 @@ input:focus {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2rem;
+    font-size: 1.5rem;
     width: 120px;
     height: 120px;
     flex-shrink: 0;
@@ -207,8 +219,22 @@ input:focus {
     opacity: 0;
 }
 
-@media screen and (max-width: 600px) {
-    .content{
+/* GAME OVER */
+.gameOverScreen {
+    text-align: center;
+    transform: translateY(30vh);
+}
+
+.gameOverScreen h1 {
+    color:rgba(128, 0, 0, 0.3);
+}
+
+.gameOverScreen h2 {
+    margin: 0.25rem;
+}
+
+@media screen and (max-width: 700px) {
+    .gameDiv{
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -217,12 +243,27 @@ input:focus {
     .display {
         display: none;
     }
+    .header {
+        justify-content: space-between;
+        transform: scale(0.6);
+        height: 40px;
+    }
+    #title {
+        position: static;
+        transform: none;
+    }
+    .gameRecord {
+        position: static;
+    }
+    .setup {
+        transform: scale(0.8);
+    }
 }
 
 @media screen and (max-height: 700px) {
     .content{
         height: 500px;
-        transform: scale(0.6);
+        transform: scale(0.8);
     }
     .header {
         height: 50px;

@@ -3,7 +3,8 @@ const screens = initiateScreens();
 
 exports.initiateUI = function(){
     const content = document.querySelector('.content');
-  
+    const gameRecord = document.querySelector('.gameRecord');
+
     function createGrid(){
         const board = document.createElement('div');
         board.classList.add('board');
@@ -64,11 +65,13 @@ exports.initiateUI = function(){
     };
 
     function printDisplay(display, string){
-        console.log(display1)
-        display.textContent = string;
-
+        display.style.opacity = '0';
+        setTimeout(()=> {
+            display.textContent = string;
+            display.style.opacity = '1'
+        },350);
         setTimeout(() => {
-            display.textContent = '';
+            display.style.opacity = '0'
         }, 1000);
     }
 
@@ -82,13 +85,27 @@ exports.initiateUI = function(){
     }
     
     return {
-        gameSetup: async function(game){
-            await screens.enterNames(game);
+        gameSetup: async function(game, gameRecord = false){
+            if (!gameRecord){
+                await screens.enterNames(game);
+            } else {
+                game.players.player1.name = gameRecord.player1.name;
+                game.players.player1.wins = gameRecord.player1.wins;
+                game.players.player2.name = gameRecord.player2.name;
+                game.players.player2.wins = gameRecord.player1.wins;
+            }
             const userBoard = createGrid();
             await screens.setupGameboard(game, userBoard, this.updateGameboard);
             return Promise.resolve();
         },
-        drawGame: function(){
+        drawGame: function(game){
+            gameRecord.innerHTML = '';
+            const recordPlayer1 = document.createElement('div')
+            const recordPlayer2 = document.createElement('div')
+            recordPlayer1.textContent = `${game.players.player1.name} : ${game.players.player1.wins} wins`;
+            recordPlayer2.textContent = `${game.players.player2.name} : ${game.players.player2.wins} wins`;
+            gameRecord.append(recordPlayer1, recordPlayer2);
+
             content.innerHTML = '';
             const gameDiv = document.createElement('div');
             gameDiv.classList.add('gameDiv');
@@ -99,9 +116,13 @@ exports.initiateUI = function(){
             const display1 = document.createElement('div');
             display1.classList.add('display');
             display1.id = 'display1';
+            const d1Text = document.createElement('div');
+            display1.append(d1Text);
             const display2 = document.createElement('div');
             display2.classList.add('display');
             display2.id = 'display2';
+            const d2Text = document.createElement('div');
+            display2.append(d2Text);
 
             gameDiv.append(player1Board, display1, player2Board, display2);
             content.append(gameDiv)
@@ -110,6 +131,9 @@ exports.initiateUI = function(){
             setTimeout(() => gameDiv.style.opacity = '1', 350);
         },
         update : function(game){
+            if (game.twoPlayer){
+                display1.textContent = game.currentPlayer ? game.players.player1.name : game.players.player2.name;
+            }
             const currentPlayer = game.currentPlayer ? 'player1' : 'player2';
             const oppenentPlayer = game.currentPlayer ? 'player2' : 'player1';
             this.updateGameboard(currentPlayer, game, 'board1');
@@ -171,8 +195,8 @@ exports.initiateUI = function(){
             if (!this.eventListenerActive){
                 return;
             };
-            // const display1 = document.querySelector('#display1')
-            // const display2 = document.querySelector('#display2')
+            const display1 = document.querySelector('#display1 div')
+            const display2 = document.querySelector('#display2 div')
 
             const coords = event.target.dataset.coords.slice(1, -1).split(',');
             let result;

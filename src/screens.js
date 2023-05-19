@@ -1,9 +1,16 @@
 exports.initiateScreens = function(){
+    const content = document.querySelector('.content');
     const menus = document.querySelector('.menus');
 
     const title = document.querySelector('.header h1');
-    title.style.transform = `translateX(calc(50vw - ${title.offsetWidth / 2}px)) translateY(30vh) scale(2)`;
-
+    if(window.innerWidth <= 700){
+        title.style.transform = `scale(2) translateY(24vh)`;
+        title.style.position = 'absolute'
+        title.style.left = `calc(50vw - ${title.offsetWidth / 2}px)`
+        console.dir(title)
+    } else {
+        title.style.transform = `translateX(-50%) translateY(30vh) scale(2)`;
+    }
     return {
         splash: function(startGame){
             const splash = document.createElement('div');
@@ -40,7 +47,7 @@ exports.initiateScreens = function(){
                 const label = document.createElement('label');
                 const nameInp = document.createElement('input');
                 nameInp.placeholder = 'Player 1'
-                label.textContent = 'Player 1 enter name: '
+                label.textContent = 'Player 1 enter name : '
                 label.append(nameInp);
                 enterNameForm.append(label);
                 menus.append(enterNameForm);
@@ -65,7 +72,7 @@ exports.initiateScreens = function(){
                             enterNameForm.style.opacity = '1';
                             nameInp.value = '';
                             nameInp.placeholder = 'Player 2'
-                            label.textContent = 'Player 2 enter name: '
+                            label.textContent = 'Player 2 enter name : '
                             label.append(nameInp);
                             nameInp.focus();
                             player = 'player2'
@@ -75,9 +82,6 @@ exports.initiateScreens = function(){
                         setTimeout(() => {
                             enterNameForm.style.opacity = '0';
                             resolve();
-                            title.style.transform = '';
-                            title.style.color = 'antiquewhite'
-                            title.style.opacity = '0.8'
                             setTimeout(()=> menus.removeChild(enterNameForm), 0);
                         },350);
                     }
@@ -85,6 +89,15 @@ exports.initiateScreens = function(){
             });
         },
         setupGameboard: async function(game, board, updateGameboard, player, gameMode){
+            if(window.innerWidth <= 700){
+                title.style.transform = ``;
+                title.style.position = 'static'
+            } else {
+                title.style.transform = 'translateX(-150%)';
+            }
+            title.style.color = 'antiquewhite'
+            title.style.opacity = '0.8'
+
             return new Promise((resolve, reject) => {
                 board.id = 'setup';
                 const fields = board.querySelectorAll('.field');
@@ -177,12 +190,15 @@ exports.initiateScreens = function(){
                     instruction.textContent = 'double click to flip'
                     shipsPreview.append(instruction)
                     instruction.style.position = 'absolute'
-                    instruction.style.left = 'calc(50vw - 120px)'
+                    instruction.style.left = 'calc(50% - 120px)'
                     instruction.style.marginTop = '10px';
                     shipsPreview.addEventListener('mousedown', removeInstruction);
                     function removeInstruction(){
-                        shipsPreview.removeChild(instruction);
-                        shipsPreview.removeEventListener('mousedown', removeInstruction);
+                        instruction.style.opacity = '0'
+                        setTimeout(()=>{
+                            shipsPreview.removeChild(instruction);
+                            shipsPreview.removeEventListener('mousedown', removeInstruction);
+                        }, 350)
                     }
                     
                     let boxSize = 30;
@@ -376,20 +392,25 @@ exports.initiateScreens = function(){
             menus.append(gameOver);
 
             this.eventListenerActive = false; 
-            gameOver.style.opacity = '1';
-            player1Board.style.filter = 'blur(5px)'
-            player2Board.style.filter = 'blur(5px)'
-            gameOverResult.textContent = `${winner} wins!`
-            newGameBtn.addEventListener('click', () => {
-                gameOver.style.opacity = '0';
-                player1Board.style.filter = '';
-                player2Board.style.filter = '';
-                splash.style.transform = 'scale(1)';
-                setTimeout(()=> menus.removeChild(gameOver), 0);
-            })
-        },
-        wait: async function(){
-            await setTimeout(() => Promise.resolve(), 1000)
+            setTimeout(() => {
+                title.style.color = 'black'
+                title.style.transform = `translateX(-50%) translateY(30vh) scale(2)`;
+                gameOver.style.opacity = '1';
+                content.style.filter = 'blur(15px)'
+                gameOverResult.textContent = `${winner} wins!`
+                newGameBtn.addEventListener('click', () => {
+                    setTimeout(()=> {
+                        gameOver.style.opacity = '0';
+                        content.style.opacity = '0';
+                        const newGameEvent = new CustomEvent('newGame');
+                        window.dispatchEvent(newGameEvent);
+                        setTimeout(()=> {
+                            menus.removeChild(gameOver)
+                            content.innerHTML = '';
+                        }, 350);
+                    }, 350)
+                })
+            }, 1500)
         },
     }
 }
