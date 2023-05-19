@@ -1,16 +1,23 @@
 exports.initiateScreens = function(){
     const content = document.querySelector('.content');
     const menus = document.querySelector('.menus');
-
-    const title = document.querySelector('.header h1');
-    if(window.innerWidth <= 700){
-        title.style.transform = `scale(2) translateY(24vh)`;
-        title.style.position = 'absolute'
-        title.style.left = `calc(50vw - ${title.offsetWidth / 2}px)`
-        console.dir(title)
-    } else {
-        title.style.transform = `translateX(-50%) translateY(30vh) scale(2)`;
+    function animateTitle(iO){
+        if(iO){
+            const title = document.querySelector('.header h1');
+            title.style.transform = `translateY(30vh) scale(2)`;
+            title.style.position = 'absolute';
+            title.style.left = `50vw - ${title.offsetWidth / 2}px`
+            title.style.color = 'black';
+        } else {
+            title.style.transform = ``;
+            title.style.position = 'static';
+            title.style.left = ``
+            title.style.color = 'antiquewhite'
+            title.style.opacity = '0.8'
+        }
     }
+    animateTitle(true);
+
     return {
         splash: function(startGame){
             const splash = document.createElement('div');
@@ -89,14 +96,7 @@ exports.initiateScreens = function(){
             });
         },
         setupGameboard: async function(game, board, updateGameboard, player, gameMode){
-            if(window.innerWidth <= 700){
-                title.style.transform = ``;
-                title.style.position = 'static'
-            } else {
-                title.style.transform = 'translateX(-150%)';
-            }
-            title.style.color = 'antiquewhite'
-            title.style.opacity = '0.8'
+            animateTitle(false);
 
             return new Promise((resolve, reject) => {
                 board.id = 'setup';
@@ -185,13 +185,14 @@ exports.initiateScreens = function(){
                 function printShips(){
                     shipsPreview.innerHTML = '';
 
-                    // show instruction only until first click
+                     // show instruction only until first click
                     instruction = document.createElement('p');
                     instruction.textContent = 'double click to flip'
                     shipsPreview.append(instruction)
                     instruction.style.position = 'absolute'
                     instruction.style.left = 'calc(50% - 120px)'
                     instruction.style.marginTop = '10px';
+
                     shipsPreview.addEventListener('mousedown', removeInstruction);
                     function removeInstruction(){
                         instruction.style.opacity = '0'
@@ -220,14 +221,25 @@ exports.initiateScreens = function(){
                             ship.style.transform = 'rotate(0deg)';
                         }
 
-                        let angle = 0;
                         ship.addEventListener('dragstart', dragStart);
                         ship.addEventListener('dragend', dragEnd);
-                        ship.addEventListener('dblclick', () => {
-                            angle = angle === 0 ? 90 : 0;
-                            ship.style.transform = `rotate(${angle}deg)`
-                            ship.dataset.direction = angle === 0 ? 'horizontal' : 'vertical';
+                        ship.addEventListener('dblclick', flipShip);
+                        ship.addEventListener('touchstart', dragStart);
+                        ship.addEventListener('touchmove', (e) => {
+                            e.preventDefault();
                         })
+                        ship.addEventListener('touchend', dragEnd);
+                        let lastTapTime = 0;
+                        ship.addEventListener('touchend', (e) => {
+                            const currentTime = new Date().getTime();
+                            const tapTimeThreshold = 300;
+
+                            if (currentTime - lastTapTime < tapTimeThreshold) {
+                                flipShip(e);
+                            }
+                            lastTapTime = currentTime;
+                        })
+
                     }
                 }
                 printShips()
@@ -309,6 +321,13 @@ exports.initiateScreens = function(){
                 };
 
                 // helper functions
+
+                function flipShip(e){
+                    const ship = e.target;
+                    angle = ship.dataset.direction === 'horizontal' ? 90 : 0;
+                    ship.style.transform = `rotate(${angle}deg)`
+                    ship.dataset.direction = angle === 0 ? 'horizontal' : 'vertical';
+                }
 
                 function populateArray(num, coords){
                     const x = parseInt(coords[1]);
@@ -393,20 +412,20 @@ exports.initiateScreens = function(){
 
             this.eventListenerActive = false; 
             setTimeout(() => {
-                title.style.color = 'black'
-                title.style.transform = `translateX(-50%) translateY(30vh) scale(2)`;
+                animateTitle(true);
                 gameOver.style.opacity = '1';
                 content.style.filter = 'blur(15px)'
                 gameOverResult.textContent = `${winner} wins!`
                 newGameBtn.addEventListener('click', () => {
                     setTimeout(()=> {
                         gameOver.style.opacity = '0';
-                        content.style.opacity = '0';
                         const newGameEvent = new CustomEvent('newGame');
                         window.dispatchEvent(newGameEvent);
                         setTimeout(()=> {
                             menus.removeChild(gameOver)
                             content.innerHTML = '';
+                            content.style.opacity = '1';
+                            content.style.filter = ''
                         }, 350);
                     }, 350)
                 })

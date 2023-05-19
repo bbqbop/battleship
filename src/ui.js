@@ -92,20 +92,13 @@ exports.initiateUI = function(){
                 game.players.player1.name = gameRecord.player1.name;
                 game.players.player1.wins = gameRecord.player1.wins;
                 game.players.player2.name = gameRecord.player2.name;
-                game.players.player2.wins = gameRecord.player1.wins;
+                game.players.player2.wins = gameRecord.player2.wins;
             }
             const userBoard = createGrid();
             await screens.setupGameboard(game, userBoard, this.updateGameboard);
             return Promise.resolve();
         },
         drawGame: function(game){
-            gameRecord.innerHTML = '';
-            const recordPlayer1 = document.createElement('div')
-            const recordPlayer2 = document.createElement('div')
-            recordPlayer1.textContent = `${game.players.player1.name} : ${game.players.player1.wins} wins`;
-            recordPlayer2.textContent = `${game.players.player2.name} : ${game.players.player2.wins} wins`;
-            gameRecord.append(recordPlayer1, recordPlayer2);
-
             content.innerHTML = '';
             const gameDiv = document.createElement('div');
             gameDiv.classList.add('gameDiv');
@@ -240,7 +233,14 @@ exports.initiateUI = function(){
             
             return;
         },
-        toggleGameOver: function(winner){
+        toggleGameOver: function(winner, game){
+            gameRecord.innerHTML = '';
+            const recordPlayer1 = document.createElement('div')
+            const recordPlayer2 = document.createElement('div')
+            recordPlayer1.textContent = `${game.players.player1.name} : ${game.players.player1.wins} wins`;
+            recordPlayer2.textContent = `${game.players.player2.name} : ${game.players.player2.wins} wins`;
+            gameRecord.append(recordPlayer1, recordPlayer2);
+
             screens.gameOver(winner);
         },
         setupSplash: function(startGame){

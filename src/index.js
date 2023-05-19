@@ -14,20 +14,20 @@ async function startGame(twoPlayer, gameRecord = false){
     UI.setupEventListeners(game.curPlayerAttacks.bind(game), game);
 }
 
-window.addEventListener('gameOver', () => {
+window.addEventListener('gameOver', (e) => {
     game.gameOver = true;
+    const loserName = e.detail;
     let winner;
     for (let player in game.players){
-        if(!game.players[player].hasLost){
+        if(game.players[player].name !== loserName){
             winner = game.players[player].name;
             game.players[player].wins++;
         }
     }   
-    UI.toggleGameOver(winner);
+    UI.toggleGameOver(winner, game);
 });
 
 window.addEventListener('newGame', () => {
-    console.log('YEY');
     const gameRecord = {
         player1: {
             name: game.players.player1.name,
@@ -39,7 +39,6 @@ window.addEventListener('newGame', () => {
         },
         twoPlayer: game.twoPlayer
     };
-    console.log(gameRecord);
     startGame(gameRecord.twoPlayer, gameRecord) 
 })
 

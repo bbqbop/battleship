@@ -6,6 +6,7 @@
     font-family: 'Ubuntu', sans-serif;
     --shadow: 2px 2px 4px;
     transition: all ease-in-out 350ms;
+    --red: rgb(255, 0, 0, 0.3);
 }
 
 /* HEADER */
@@ -15,18 +16,14 @@
     height: 80px;
     display: flex;
     align-items: center;
-}
-
-#title {
-    position: absolute;
-    left: 50%;
-    transform-origin: center;
+    justify-content: space-evenly;
+    z-index: 10;
 }
 
 .gameRecord {
-    position: absolute;
-    right: calc(50% - 300px);
+    width: 162px;
     text-align: right;
+    color: var(--red);
 }
 
 button {
@@ -36,7 +33,7 @@ button {
 }
 
 button:hover {
-    background-color: rgb(255, 0, 0, 0.3);
+    background-color: var(--red);
 }
 
 button:active {
@@ -45,7 +42,7 @@ button:active {
 
 input:focus {
     border: solid 1px grey;
-    outline: solid 2px rgb(255, 0, 0, 0.3);
+    outline: solid 2px var(--red);
     border-radius: 2px;
 }
 
@@ -169,7 +166,7 @@ input:focus {
 }
 
 .label {
-    background-color: rgb(255, 0, 0, 0.3);
+    background-color: var(--red);
 }
 .label.corner {
     background-color: transparent;
@@ -205,32 +202,30 @@ input:focus {
     background-color: rgb(93, 93, 93, 0.3);
 }
 
-.switchPlayerScreen {
-    position: absolute;
-    height: 100%;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 3;
-    font-size: 3rem;
+/* SWITCH PLAYER */
+
+.switchPlayerScreen::after {
+    content: '...';
+    color: var(--red);
 }
+
 .board.hide > *{
     opacity: 0;
 }
-
 /* GAME OVER */
-.gameOverScreen {
+.gameOverScreen, .switchPlayerScreen {
     text-align: center;
     transform: translateY(30vh);
 }
 
 .gameOverScreen h1 {
     color:rgba(128, 0, 0, 0.3);
+    font-size: 3rem;
+    text-shadow: 2px 2px 2px antiquewhite;
 }
 
 .gameOverScreen h2 {
-    margin: 0.25rem;
+    margin: 0.4rem;
 }
 
 @media screen and (max-width: 700px) {
@@ -244,16 +239,8 @@ input:focus {
         display: none;
     }
     .header {
-        justify-content: space-between;
         transform: scale(0.6);
-        height: 40px;
-    }
-    #title {
-        position: static;
-        transform: none;
-    }
-    .gameRecord {
-        position: static;
+        height: 50px;
     }
     .setup {
         transform: scale(0.8);
