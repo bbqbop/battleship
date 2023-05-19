@@ -283,11 +283,16 @@ input:focus {
     }
     .header {
         transform: scale(0.6);
+        transform-origin: bottom;
         height: 50px;
     }
     .setup {
         transform: scale(0.8);
     }
+    .splash, .enterNames {
+        transform: translateY(20vh);
+    }
+
 }
 
 @media screen and (max-height: 700px) {
