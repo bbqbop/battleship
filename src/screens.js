@@ -1,6 +1,9 @@
 exports.initiateScreens = function(){
     const menus = document.querySelector('.menus');
 
+    const title = document.querySelector('.header h1');
+    title.style.transform = `translateX(calc(50vw - ${title.offsetWidth / 2}px)) translateY(30vh) scale(2)`;
+
     return {
         splash: function(startGame){
             const splash = document.createElement('div');
@@ -15,14 +18,18 @@ exports.initiateScreens = function(){
             menus.append(splash)
 
             singlePlayerBtn.addEventListener('click', ()=>{
-                splash.style.transform = 'scale(0)';
-                startGame(false);
-                setTimeout(()=> menus.removeChild(splash), 0);
+                splash.style.opacity = '0'
+                setTimeout(()=> {
+                    startGame(false);
+                    setTimeout(()=> menus.removeChild(splash), 0);
+                }, 350);
             });
             twoPlayerBtn.addEventListener('click', ()=>{
-                splash.style.transform = 'scale(0)'
-                startGame(true);
-                setTimeout(()=> menus.removeChild(splash), 0);
+                splash.style.opacity = '0'
+                setTimeout(()=> {
+                    startGame(true);
+                    setTimeout(()=> menus.removeChild(splash), 0);
+            }, 350);
             });
             
         },
@@ -33,44 +40,60 @@ exports.initiateScreens = function(){
                 const label = document.createElement('label');
                 const nameInp = document.createElement('input');
                 nameInp.placeholder = 'Player 1'
-                label.textContent = 'Player 1 enter name:'
+                label.textContent = 'Player 1 enter name: '
                 label.append(nameInp);
                 enterNameForm.append(label);
                 menus.append(enterNameForm);
-                nameInp.focus()
 
+                enterNameForm.style.opacity = '0';
+                setTimeout(()=> {
+                    enterNameForm.style.opacity = '1';
+                },0)
+
+                nameInp.focus()
 
                 let player = 'player1'
                 enterNameForm.addEventListener('submit', (e) => {
+                    
+                    enterNameForm.style.opacity = '0';
+                
                     e.preventDefault();
                     const name = e.target[0].value === '' ? e.target[0].placeholder : e.target[0].value
                     game.players[player].name = name
                     if (game.twoPlayer && player === 'player1'){
-                        nameInp.value = '';
-                        nameInp.placeholder = 'Player 2'
-                        label.textContent = 'Player 2 enter name:'
-                        label.append(nameInp);
-                        nameInp.focus();
-                        player = 'player2'
+                        setTimeout(()=> {
+                            enterNameForm.style.opacity = '1';
+                            nameInp.value = '';
+                            nameInp.placeholder = 'Player 2'
+                            label.textContent = 'Player 2 enter name: '
+                            label.append(nameInp);
+                            nameInp.focus();
+                            player = 'player2'
+                        }, 350)
                     }
                     else {
-                        enterNameForm.style.transform = 'scale(0)';
-                        resolve();
-                        setTimeout(()=> menus.removeChild(enterNameForm), 0);
+                        setTimeout(() => {
+                            enterNameForm.style.opacity = '0';
+                            resolve();
+                            title.style.transform = '';
+                            title.style.color = 'antiquewhite'
+                            title.style.opacity = '0.8'
+                            setTimeout(()=> menus.removeChild(enterNameForm), 0);
+                        },350);
                     }
                 })
             });
         },
-        setupGameboard: function(game, board, update, player, gameMode){
-            const fields = board.querySelectorAll('.field');
-           
+        setupGameboard: async function(game, board, updateGameboard, player, gameMode){
             return new Promise((resolve, reject) => {
+                board.id = 'setup';
+                const fields = board.querySelectorAll('.field');
+
                 let curPlayer = player || 'player1';
                 const setupContainer = document.createElement('div');
                 setupContainer.classList.add(`setup`);
                 const title = document.createElement('h1');
                 title.textContent = `${game.players[curPlayer].name} place your ships`;
-                board.id = 'board1';
                 const error = document.createElement('span');
 
                 gameMode = gameMode || 'modern';
@@ -84,7 +107,7 @@ exports.initiateScreens = function(){
                 gameModeSelect.addEventListener('change', (e) => {
                     gameMode = e.target.value.toLowerCase();
                     game.players[curPlayer].clearAll();
-                    update(curPlayer, 'board1', game);
+                    updateGameboard(curPlayer, game);
                     printShips();
                 })
                 gameModeSelect.append(optModern, optClassic);
@@ -98,43 +121,45 @@ exports.initiateScreens = function(){
                 randomBtn.textContent = 'Random';
                 randomBtn.addEventListener('click', () => {
                     game.players[curPlayer].populateGameboard(game.gameModes[gameMode]);
-                    update(curPlayer, 'board1', game);
+                    updateGameboard(curPlayer, game);
                     shipsPreview.innerHTML = '';
                 });
 
                 startGameBtn = document.createElement('button');
                 startGameBtn.textContent = game.twoPlayer && curPlayer !== 'player2' ? 'Next' : 'Start Game'
-                startGameBtn.addEventListener('click', () => {
+                startGameBtn.addEventListener('click', async () => {
                     if (shipsPreview.childElementCount !== 0){
                         error.textContent = 'place all remaining ships!'
                         return;
                     }
-                    if (startGameBtn.textContent === 'Next'){
-                        game.currentPlayer = !game.currentPlayer;
-                        this.switchPlayers(game);
-                        
-                        fields.forEach(field => {
-                            field.classList.remove(...field.classList);
-                            field.classList.add('field');
-                            field.removeEventListener('dragenter', dragEnter);
-                            field.removeEventListener('dragover', dragOver);
-                            field.removeEventListener('drop', dragDrop);
-                        });
-                        menus.removeChild(setupContainer);
+                    setupContainer.style.opacity = '0';
+                    setTimeout(async () => {
+                        if (startGameBtn.textContent === 'Next'){
+                            game.currentPlayer = !game.currentPlayer;
+                            
+                            fields.forEach(field => {
+                                field.classList.remove(...field.classList);
+                                field.classList.add('field');
+                                field.removeEventListener('dragenter', dragEnter);
+                                field.removeEventListener('dragover', dragOver);
+                                field.removeEventListener('drop', dragDrop);
+                            });
+                            menus.removeChild(setupContainer);
 
-                        setTimeout(() => {
-                            return resolve(this.setupGameboard(game, board, update, 'player2', gameMode));
-                        },4000);
-                    }
-                    else {
-                        if (!game.twoPlayer){
-                            game.players.player2.populateGameboard(game.gameModes[gameMode]);
+                            await this.switchPlayers(game);
+                            return resolve(this.setupGameboard(game, board, updateGameboard, 'player2', gameMode));
+                            
                         }
-                        menus.removeChild(setupContainer);
-                        game.currentPlayer = true;
-                        this.switchPlayers(game);
-                        return resolve();
-                    }
+                        else {
+                            if (!game.twoPlayer){
+                                game.players.player2.populateGameboard(game.gameModes[gameMode]);
+                            }
+                            menus.removeChild(setupContainer);
+                            game.currentPlayer = true;
+                            await this.switchPlayers(game);
+                            return resolve();
+                        }
+                    }, 350)
                 });
 
                 ///////////////////
@@ -146,6 +171,20 @@ exports.initiateScreens = function(){
 
                 function printShips(){
                     shipsPreview.innerHTML = '';
+
+                    // show instruction only until first click
+                    instruction = document.createElement('p');
+                    instruction.textContent = 'double click to flip'
+                    shipsPreview.append(instruction)
+                    instruction.style.position = 'absolute'
+                    instruction.style.left = 'calc(50vw - 120px)'
+                    instruction.style.marginTop = '10px';
+                    shipsPreview.addEventListener('mousedown', removeInstruction);
+                    function removeInstruction(){
+                        shipsPreview.removeChild(instruction);
+                        shipsPreview.removeEventListener('mousedown', removeInstruction);
+                    }
+                    
                     let boxSize = 30;
                     let shipsList = game.gameModes[gameMode].ships;
                     for (let i = 0; i < shipsList.length; i++){
@@ -157,16 +196,22 @@ exports.initiateScreens = function(){
                         ship.style.fontSize = `calc(0.3rem * ${shipsList[i][0]})`
                         ship.draggable = true;
                         shipsPreview.append(ship);
+                        if (i === 0) {
+                            ship.dataset.direction = 'vertical';
+                            ship.style.transform = 'rotate(90deg)';
+                        } else {
+                            ship.dataset.direction = 'horizontal';
+                            ship.style.transform = 'rotate(0deg)';
+                        }
 
                         let angle = 0;
                         ship.addEventListener('dragstart', dragStart);
                         ship.addEventListener('dragend', dragEnd);
                         ship.addEventListener('dblclick', () => {
-                        angle = angle === 0 ? 90 : 0;
-                        ship.style.transform = `rotate(${angle}deg)`
-                        ship.dataset.direction = angle === 0 ? 'horizontal' : 'vertical';
-
-                    })
+                            angle = angle === 0 ? 90 : 0;
+                            ship.style.transform = `rotate(${angle}deg)`
+                            ship.dataset.direction = angle === 0 ? 'horizontal' : 'vertical';
+                        })
                     }
                 }
                 printShips()
@@ -243,7 +288,7 @@ exports.initiateScreens = function(){
                     const startPos = [x, y];
 
                     game.players[curPlayer].placeShip(length, initial, startPos, vert)
-                    update(curPlayer, 'board1', game)
+                    updateGameboard(curPlayer, game)
                     shipsPreview.removeChild(draggedShip);
                 };
 
@@ -271,41 +316,52 @@ exports.initiateScreens = function(){
                     });
                     fieldsArr = [];
                 }
-                            
+                
                 setupContainer.append(title, gameModeSelect, randomBtn, startGameBtn, error, board, shipsPreview);
                 menus.append(setupContainer);
+
+                setupContainer.style.opacity = '0';
+                setTimeout(()=> setupContainer.style.opacity = '1', 350)
             })
         },
         switchPlayers: async function(game){
-            const switchPlayerScreen = document.createElement('div');
-            switchPlayerScreen.classList.add('switchPlayerScreen');
-            switchPlayerScreen.innerHTML = "<span></span>'s turn in &nbsp;<span><span>"
-            switchPlayerScreen.style.transform = 'scale(0)'
-            menus.append(switchPlayerScreen);
+            return new Promise((resolve, reject) => {
+                const switchPlayerScreen = document.createElement('div');
+                switchPlayerScreen.classList.add('switchPlayerScreen');
+                switchPlayerScreen.innerHTML = "<span></span>'s turn in &nbsp;<span><span>"
+                switchPlayerScreen.style.opacity = '0'
+                menus.append(switchPlayerScreen);
 
-            const currentPlayer = game.currentPlayer ? game.players.player1.name : game.players.player2.name;
-            const span1 = document.querySelector('.switchPlayerScreen span:first-child');
-            const span2 = document.querySelector('.switchPlayerScreen span:last-child');
-            const board1 = document.querySelector('#board1');
-            const elementsToBlur = document.querySelectorAll('.content > *:not(.switchPlayerScreen)');
-            elementsToBlur.forEach(element => element.style.filter = 'blur(15px)');
-            board1.classList.toggle('hide');
-            switchPlayerScreen.style.transform = 'scale(1)';
-            span1.textContent = currentPlayer;
-            for (let i = 1; i < 4; i++){
+                const currentPlayer = game.currentPlayer ? game.players.player1.name : game.players.player2.name;
+                const span1 = document.querySelector('.switchPlayerScreen span:first-child');
+                const span2 = document.querySelector('.switchPlayerScreen span:last-child');
+                const board1 = document.querySelector('#board1');
+                const elementsToBlur = document.querySelectorAll('.content > *:not(.switchPlayerScreen)');
+                setTimeout(()=>{
+                elementsToBlur.forEach(element => element.style.filter = 'blur(15px)');
+                if (board1) {
+                    board1.classList.toggle('hide');
+                }
+                switchPlayerScreen.style.opacity = '1';
+                span1.textContent = currentPlayer;
+                for (let i = 0; i < 3; i++){
+                    setTimeout(() => {
+                        span2.textContent = 3 - i;
+                    }, 1000 * i)
+                }
                 setTimeout(() => {
-                    span2.textContent = 4 - i;
-                }, 1000 * i)
-            }
-            setTimeout(() => {
-                switchPlayerScreen.style.transform = 'scale(0)';
-                elementsToBlur.forEach(element => element.style.filter = 'blur(0px)');
-                span2.textContent = '';
-                this.eventListenerActive = true;
-                board1.classList.toggle('hide');
-                menus.removeChild(switchPlayerScreen);
-            }, 4000)
-            return;
+                    switchPlayerScreen.style.opacity = '0';
+                    elementsToBlur.forEach(element => element.style.filter = 'blur(0px)');
+                    span2.textContent = '';
+                    this.eventListenerActive = true;
+                    if(board1){
+                        board1.classList.toggle('hide');
+                    }
+                    setTimeout(() => menus.removeChild(switchPlayerScreen),0);
+                    return resolve();
+                }, 3000)
+                },350)
+            })
         },
         gameOver: function(winner){
             const gameOver = document.createElement('div');
@@ -316,21 +372,24 @@ exports.initiateScreens = function(){
             const newGameBtn = document.createElement('button');
             newGameBtn.textContent = 'Start new game';
             gameOver.append(gameOverTitle, gameOverResult, newGameBtn);
-            gameOver.style.transform = 'scale(0)';
+            gameOver.style.opacity = '0';
             menus.append(gameOver);
 
             this.eventListenerActive = false; 
-            gameOver.style.transform = 'scale(1)';
+            gameOver.style.opacity = '1';
             player1Board.style.filter = 'blur(5px)'
             player2Board.style.filter = 'blur(5px)'
             gameOverResult.textContent = `${winner} wins!`
             newGameBtn.addEventListener('click', () => {
-                gameOver.style.transform = 'scale(0)';
+                gameOver.style.opacity = '0';
                 player1Board.style.filter = '';
                 player2Board.style.filter = '';
                 splash.style.transform = 'scale(1)';
                 setTimeout(()=> menus.removeChild(gameOver), 0);
             })
         },
+        wait: async function(){
+            await setTimeout(() => Promise.resolve(), 1000)
+        },
     }
-};
+}

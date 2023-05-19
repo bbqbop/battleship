@@ -12,9 +12,33 @@
     height: 80px;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
+    margin: 0 1rem;
 }
 
+#title {
+    transform-origin: center;
+}
+
+button {
+    background-color: antiquewhite;
+    border: solid 1px grey;
+    border-radius: 2px;
+}
+
+button:hover {
+    background-color: rgb(255, 0, 0, 0.3);
+}
+
+button:active {
+    background-color: white;
+}
+
+input:focus {
+    border: solid 1px grey;
+    outline: solid 2px rgb(255, 0, 0, 0.3);
+    border-radius: 2px;
+}
 
 .menus {
     position: absolute;
@@ -24,6 +48,23 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
+}
+
+.menus * {
+    z-index: 999;
+}
+
+/* GAMESETUP */
+
+.setup{
+
+}
+
+.setup .shipsPreview {
+    width: 330px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
 }
 
 .field.hover {

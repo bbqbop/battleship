@@ -3,28 +3,7 @@ const screens = initiateScreens();
 
 exports.initiateUI = function(){
     const content = document.querySelector('.content');
-    const header = document.querySelector('.header');
-    const menus = document.querySelector('.menus');
-    content.innerHTML = '';
-
-    // GameBoards
-
-    const gameDiv = document.createElement('div');
-    gameDiv.classList.add('gameDiv', 'hidden');
-    const player1Board = createGrid();
-    player1Board.id = 'board1';
-    const player2Board = createGrid();
-    player2Board.id = 'board2';
-    const display1 = document.createElement('div');
-    display1.classList.add('display');
-    display1.id = 'display1';
-    const display2 = document.createElement('div');
-    display2.classList.add('display');
-    display2.id = 'display2';
-
-    gameDiv.append(player1Board, display1, player2Board, display2);
-    content.append(gameDiv)
-
+  
     function createGrid(){
         const board = document.createElement('div');
         board.classList.add('board');
@@ -85,6 +64,7 @@ exports.initiateUI = function(){
     };
 
     function printDisplay(display, string){
+        console.log(display1)
         display.textContent = string;
 
         setTimeout(() => {
@@ -106,17 +86,36 @@ exports.initiateUI = function(){
             await screens.enterNames(game);
             const userBoard = createGrid();
             await screens.setupGameboard(game, userBoard, this.updateGameboard);
-            gameDiv.classList.remove('hidden');
-            gameDiv.style.transform = 'scale(1)';
             return Promise.resolve();
+        },
+        drawGame: function(){
+            content.innerHTML = '';
+            const gameDiv = document.createElement('div');
+            gameDiv.classList.add('gameDiv');
+            const player1Board = createGrid();
+            player1Board.id = 'board1';
+            const player2Board = createGrid();
+            player2Board.id = 'board2';
+            const display1 = document.createElement('div');
+            display1.classList.add('display');
+            display1.id = 'display1';
+            const display2 = document.createElement('div');
+            display2.classList.add('display');
+            display2.id = 'display2';
+
+            gameDiv.append(player1Board, display1, player2Board, display2);
+            content.append(gameDiv)
+
+            gameDiv.style.opacity = '0';
+            setTimeout(() => gameDiv.style.opacity = '1', 350);
         },
         update : function(game){
             const currentPlayer = game.currentPlayer ? 'player1' : 'player2';
             const oppenentPlayer = game.currentPlayer ? 'player2' : 'player1';
-            this.updateGameboard(currentPlayer, 'board1', game);
-            this.updateGameboard(oppenentPlayer, 'board2', game);      
+            this.updateGameboard(currentPlayer, game, 'board1');
+            this.updateGameboard(oppenentPlayer, game, 'board2');      
         },
-        updateGameboard : function(player, board, game){
+        updateGameboard : function(player, game, board = 'setup'){
             for (let i = 9; i >= 0; i--){
                 for (let j = 0; j < 10; j++){
                     const field = document.querySelector(`#${board} [data-coords="[${i},${j}]"`);
@@ -150,17 +149,17 @@ exports.initiateUI = function(){
                             })
                         }
                     }
-                    else if (fieldData !== null && board === 'board1'){    
+                    else if (fieldData !== null && board === 'board1' || fieldData !== null && board === 'setup'){    
                         field.classList.add('ship');
                         field.classList.add(fieldData);
                     }
 
                 }
             }
-        },
+        }, 
         eventListenerActive: true,
         setupEventListeners: function(attack, game){
-            const board2 = document.querySelector('#board2');
+            const board2 = document.querySelector('.content #board2');
             const fields = board2.querySelectorAll('.field');
             fields.forEach(field => {
                 field.addEventListener('click', (event) => {
@@ -172,6 +171,9 @@ exports.initiateUI = function(){
             if (!this.eventListenerActive){
                 return;
             };
+            // const display1 = document.querySelector('#display1')
+            // const display2 = document.querySelector('#display2')
+
             const coords = event.target.dataset.coords.slice(1, -1).split(',');
             let result;
             try {
@@ -196,11 +198,11 @@ exports.initiateUI = function(){
                     return
                 }
                 if (game.twoPlayer){
-                    setTimeout(() => {
-                        screens.switchPlayers(game);
-                        setTimeout(()=>this.update(game), 1000);
+                    setTimeout(async () => {
+                        await screens.switchPlayers(game);
+                        this.update(game);
                         this.eventListenerActive = true
-                    }, 1000)
+                    },1000)
                 }
                 else {
                 setTimeout(()=>{

@@ -9,6 +9,7 @@ UI.setupSplash(startGame);
 async function startGame(twoPlayer){
     newGame = new Game(twoPlayer);
     await UI.gameSetup(newGame);
+    UI.drawGame();
     UI.update(newGame);
     UI.setupEventListeners(newGame.curPlayerAttacks.bind(newGame), newGame);
 }
