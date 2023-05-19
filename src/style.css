@@ -30,6 +30,7 @@ button {
     background-color: antiquewhite;
     border: solid 1px grey;
     border-radius: 2px;
+    color: black;
 }
 
 button:hover {
